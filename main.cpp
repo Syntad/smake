@@ -8,6 +8,7 @@ extern "C" {
 #include <iostream>
 #include <build.h>
 #include <stack>
+#include <chrono>
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
 constexpr bool windows = true;
@@ -152,8 +153,12 @@ int flags(lua_State* L) {
 
 int build(lua_State* L) {
     std::cout << "Building..." << std::endl;
+    
+    auto start = std::chrono::high_resolution_clock::now();
     system(build::get_cmd().c_str());
-    std::cout << "Build Successful. Output to " << build::output << std::endl;
+    auto end = std::chrono::high_resolution_clock::now();
+    
+    std::cout << "Build took " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
     
     return 0;
 }

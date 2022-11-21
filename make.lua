@@ -1,14 +1,6 @@
-print('args', ...)
-
---[[
--- install
-if is_windows then
-    -- run('echo a', 'echo b')
-end
-
--- build
+standard('c++2a')
 input('main.cpp', 'src/*.cpp')
 include('include')
 include('lua', 'lua', 'lua')
-output(is_windows and 'test.exe' or 'test.o')
-build() ]]
+output(is_windows and 'out/smake.exe' or 'out/smake.o')
+build()

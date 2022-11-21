@@ -1,43 +1,49 @@
+// TODO: Add -i flag for install, add smake global table. Calls smake.install()
+// TODO: Add -b flag for build. Calls smake.build(). Only necessary for explicit build function, smake with no args just runs file
+// TODO: Add -f flag for file
+
 extern "C" {
     #include <lua.h>
     #include <lualib.h>
     #include <lauxlib.h>
 }
 
-#include <clocale>
+#include <platform.h>
 #include <iostream>
 #include <build.h>
 #include <stack>
 #include <chrono>
 
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32) && !defined(__CYGWIN__)
-constexpr bool windows = true;
-constexpr bool mac = false;
-constexpr bool linux = false;
-#elif __APPLE__
-constexpr bool windows = false;
-constexpr bool mac = true;
-constexpr bool linux = false;
-#else
-constexpr bool windows = false;
-constexpr bool mac = false;
-constexpr bool linux = true;
-#endif
-
 // Helpers
 
-void register_os(lua_State* L) {
-    lua_pushboolean(L, windows);
-    lua_setglobal(L, "is_windows");
-    
-    lua_pushboolean(L, mac);
-    lua_setglobal(L, "is_mac");
-    
-    lua_pushboolean(L, mac);
-    lua_setglobal(L, "is_linux");
-    
-    lua_pushstring(L, windows ? "windows" : (mac ? "mac" : "linux"));
-    lua_setglobal(L, "os_name");
+void register_platform(lua_State* L) {
+    lua_createtable(L, 0, 6);
+
+    lua_pushstring(L, "is_windows");
+    lua_pushboolean(L, platform == "windows");
+    lua_settable(L, -3);
+
+    lua_pushstring(L, "is_osx");
+    lua_pushboolean(L, platform == "osx");
+    lua_settable(L, -3);
+
+    lua_pushstring(L, "is_linux");
+    lua_pushboolean(L, platform == "linux");
+    lua_settable(L, -3);
+
+    lua_pushstring(L, "is_unix");
+    lua_pushboolean(L, platform == "unix");
+    lua_settable(L, -3);
+
+    lua_pushstring(L, "is_unknown");
+    lua_pushboolean(L, platform == "unknown");
+    lua_settable(L, -3);
+
+    lua_pushstring(L, "name");
+    lua_pushstring(L, platform);
+    lua_settable(L, -3);
+
+    lua_setglobal(L, "platform");
 }
 
 // Options
@@ -168,7 +174,7 @@ int main(int argc, char *argv[]) {
     luaL_openlibs(L);
 
     // constants
-    register_os(L);
+    register_platform(L);
 
     // main build options
     lua_register(L, "standard", standard);
@@ -177,21 +183,21 @@ int main(int argc, char *argv[]) {
     lua_register(L, "output", output);
     lua_register(L, "run", run);
     lua_register(L, "flags", flags);
-    lua_register(L ,"build", build);
+    lua_register(L, "build", build);
 
     string file_name = "make.lua";
 
+    if (argc > 1) {
+        file_name = string(argv[1]);
+    }
+    
     if (luaL_loadfile(L, file_name.c_str()) != LUA_OK) {
         printf("Error loading file: %s\n", lua_tostring(L, -1));
         return 0;
     }
-
-    if (argc > 1) {
-        file_name = string(argv[1]);
-
-        for (int i = 2; i < argc; i++) {
-            lua_pushstring(L, argv[i]);
-        }
+    
+    for (int i = 2; i < argc; i++) {
+        lua_pushstring(L, argv[i]);
     }
 
     if (lua_pcall(L, argc > 1 ? argc - 2 : 0, 0, 0) != LUA_OK) {

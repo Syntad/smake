@@ -1,7 +1,3 @@
-// TODO: Add -i flag for install, add smake global table. Calls smake.install()
-// TODO: Add -b flag for build. Calls smake.build(). Only necessary for explicit build function, smake with no args just runs file
-// TODO: Add -f flag for file
-
 extern "C" {
     #include <lua.h>
     #include <lualib.h>

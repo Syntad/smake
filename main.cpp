@@ -13,6 +13,7 @@ extern "C" {
 #include <build.h>
 #include <stack>
 #include <chrono>
+#include <unistd.h>
 
 // Helpers
 
@@ -62,17 +63,17 @@ int input(lua_State* L) {
         build::input.push_back(luaL_checkstring(L, -1));
         lua_pop(L, 1);
     }
-    
+
     return 0;
 }
 
 int include(lua_State* L) {
     int nargs = lua_gettop(L);
-    
+
     if (nargs == 0 || nargs > 3) {
         return luaL_error(L, "Include takes 1-3 args but got %d args.", nargs);
     }
-    
+
     switch (nargs) {
         case 1: {
             int type = lua_type(L, -1);
@@ -158,25 +159,45 @@ int flags(lua_State* L) {
 }
 
 int build(lua_State* L) {
-    std::cout << "Building..." << std::endl;
+    printf("\e[?25l\r\033[33mBuilding...\033[0m");
     
     auto start = std::chrono::high_resolution_clock::now();
     system(build::get_cmd().c_str());
     auto end = std::chrono::high_resolution_clock::now();
     
-    std::cout << "Build took " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms" << std::endl;
+    printf("\r\033[32mBuild Successful! \033[33m(%dms)\033[0m\e[?25h\n", std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
     
     return 0;
+}
+
+void call_smake_func(lua_State* L, const char* func) {
+    lua_getglobal(L, "smake");
+                
+    if (lua_type(L, -1) == LUA_TTABLE) {
+        lua_getfield(L, -1, func);
+        
+        if (lua_type(L, -1) == LUA_TFUNCTION) {
+            lua_call(L, 0, 0);
+        }
+        else {
+            lua_pop(L, 1);
+        }
+    }
+    else {
+        lua_pop(L, 1);
+    }  
 }
 
 int main(int argc, char *argv[]) {
     lua_State* L = luaL_newstate();
     luaL_openlibs(L);
 
-    // constants
+    // Constants
     register_platform(L);
+    lua_newtable(L);
+    lua_setglobal(L, "smake");
 
-    // main build options
+    // Build options
     lua_register(L, "standard", standard);
     lua_register(L, "input", input);
     lua_register(L, "include", include);
@@ -186,22 +207,50 @@ int main(int argc, char *argv[]) {
     lua_register(L, "build", build);
 
     string file_name = "make.lua";
-
-    if (argc > 1) {
-        file_name = string(argv[1]);
-    }
     
+    // Parse arguments
+    int opt;
+    bool is_install = false, is_build = false;
+
+    while ((opt = getopt(argc, argv, "ibf:")) != -1) {
+        switch (opt) {
+            case 'f': {
+                file_name = string(optarg);
+                break;
+            }
+            case 'i': {
+                is_install = true;
+                break;
+            }
+            case 'b': {
+                is_build = true;
+                break;
+            }
+        }
+    }
+
+    // Run
     if (luaL_loadfile(L, file_name.c_str()) != LUA_OK) {
         printf("Error loading file: %s\n", lua_tostring(L, -1));
         return 0;
     }
-    
+
     for (int i = 2; i < argc; i++) {
         lua_pushstring(L, argv[i]);
     }
 
     if (lua_pcall(L, argc > 1 ? argc - 2 : 0, 0, 0) != LUA_OK) {
         printf("Error: %s\n", lua_tostring(L, -1));
+    }
+    
+    call_smake_func(L, "init");
+
+    if (is_install) {
+        call_smake_func(L, "install");
+    }
+
+    if (is_build || !is_install) {
+        call_smake_func(L, "build");
     }
 
     return 0;

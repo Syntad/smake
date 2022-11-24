@@ -1,9 +1,4 @@
-extern "C" {
-    #include <lua.h>
-    #include <lualib.h>
-    #include <lauxlib.h>
-}
-
+#include <lua.hpp>
 #include <platform.h>
 #include <iostream>
 #include <build.h>
@@ -206,20 +201,24 @@ int main(int argc, char *argv[]) {
     
     // Parse arguments
     int opt;
-    bool is_install = false, is_build = false;
+    bool install = false, build = false, run = false;
 
-    while ((opt = getopt(argc, argv, "ibf:")) != -1) {
+    while ((opt = getopt(argc, argv, "ibrf:")) != -1) {
         switch (opt) {
             case 'f': {
                 file_name = string(optarg);
                 break;
             }
             case 'i': {
-                is_install = true;
+                install = true;
                 break;
             }
             case 'b': {
-                is_build = true;
+                build = true;
+                break;
+            }
+            case 'r': {
+                run = true;
                 break;
             }
         }
@@ -241,12 +240,16 @@ int main(int argc, char *argv[]) {
     
     call_smake_func(L, "init");
 
-    if (is_install) {
+    if (install) {
         call_smake_func(L, "install");
     }
 
-    if (is_build || !is_install) {
+    if (build || (!install && !run)) {
         call_smake_func(L, "build");
+    }
+    
+    if (run) {
+        call_smake_func(L, "run");
     }
 
     return 0;

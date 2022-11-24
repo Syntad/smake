@@ -17,4 +17,5 @@ end
 -- build
 input('main.cpp', 'src/*.cpp')
 output('out/smake.exe')
+flags('-static-libgcc -static-libstdc++')
 build()

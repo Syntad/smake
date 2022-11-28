@@ -1,3 +1,4 @@
+#include <lua.hpp>
 #if defined(_WIN32) || defined(__CYGWIN__)
     constexpr const char* platform = "windows";
 #elif defined(__linux__)
@@ -9,3 +10,7 @@
 #else
     constexpr const char* platform = "unknown";
 #endif
+
+namespace Platform {
+    extern void Register(lua_State* L);
+}

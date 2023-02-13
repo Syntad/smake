@@ -1,29 +1,29 @@
 ---@diagnostic disable: undefined-global
-using('g++')
+local gpp = include('smake/gpp')
 
 function smake.build()
     -- options
-    standard('c++2a')
+    gpp.standard('c++2a')
 
     -- includes
-    include('include')
+    gpp.include('include')
 
     if platform.is_windows then
-        flags('-static-libgcc -static-libstdc++')
+        gpp.flags('-static-libgcc -static-libstdc++')
     elseif platform.is_linux then
-        flags('-ldl')
+        gpp.flags('-ldl')
     end
 
-    include('lua', 'lua', 'lua')
+    gpp.include('lua', 'lua', 'lua')
 
     -- dependencies
-    include('dependencies/include')
-    input('dependencies/src/*.cpp')
+    gpp.include('dependencies/include')
+    gpp.input('dependencies/src/*.cpp')
 
     -- build
-    input('main.cpp', 'src/*.cpp')
-    output(platform.is_windows and 'smake.exe' or 'smake')
-    build()
+    gpp.input('main.cpp', 'src/*.cpp')
+    gpp.output(platform.is_windows and 'smake.exe' or 'smake')
+    gpp.build()
 end
 
 function smake.install()

@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <filesystem>
+#include <unordered_map>
 
 namespace Configuration
 {

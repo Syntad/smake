@@ -13,7 +13,6 @@ void run(lua_State* L, int argc, char* argv[]) {
     bool install = false, build = false, run = false;
 
     if (argc >= 3 && !strcmp(argv[1], "-p")) {
-        Plugins::Init(L, argc, argv);
         Plugins::ExecuteResult result = Plugins::Execute(argv[2]);
 
         if (result == Plugins::ExecuteResult::NotFound) {
@@ -57,7 +56,11 @@ void run(lua_State* L, int argc, char* argv[]) {
     if (lua_pcall(L, argc > 1 ? argc - 2 : 0, 0, 0) != LUA_OK) {
         printf("Error: %s\n", lua_tostring(L, -1));
     }
-    
+
+    if (argc == 2 && API::CallSmakeFunction(L, argv[1])) {
+        return;
+    }
+
     API::CallSmakeFunction(L, "init");
 
     if (install) {
@@ -78,8 +81,8 @@ int main(int argc, char *argv[]) {
 
     lua_State* L = luaL_newstate();
     luaL_openlibs(L);
-
     API::Register(L);
+    Plugins::Init(L, argc, argv);
     run(L, argc, argv);
 
     return 0;

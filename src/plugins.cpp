@@ -1,4 +1,5 @@
 #include <plugins.hpp>
+#include <api.hpp>
 #include <configuration.hpp>
 #include <unordered_map>
 #include <iostream>
@@ -13,9 +14,45 @@ namespace Plugins {
     int argc;
     char** argv;
 
-    #pragma region Lua Functions
+    ExecuteResult runPluginFile(std::string name) {
+        if (!name.ends_with(".lua")) {
+            name += ".lua";
+        }
 
-    // Plugins.Register('luau-bundle', 'fbc', function(plugin))
+        fs::path path = Configuration::globalPluginsDirectory / name;
+
+        if (!fs::exists(path)) {
+            path = Configuration::relativePluginsDirectory / name;
+        }
+
+        if (fs::exists(path)) {
+            if (luaL_dofile(L, path.c_str()) != LUA_OK) {
+                printf("Error loading plugin (%s): %s\n", path.c_str(), lua_tostring(L, -1));
+                return ExecuteResult::Error;
+            }
+
+
+            return ExecuteResult::Ok;
+        }
+
+        return ExecuteResult::NotFound;
+    }
+
+    bool callPluginFunction(const char* name, int r = 0) {
+        lua_getglobal(L, "Plugin");
+        lua_pushstring(L, name);
+        lua_rawget(L, -2);
+
+        if (lua_type(L, -1) == LUA_TFUNCTION) {
+            lua_call(L, 0, r);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    #pragma region Lua Functions
 
     int l_parseFlags(lua_State* L) {
         int opt;
@@ -53,12 +90,33 @@ namespace Plugins {
         return 1;
     }
 
+    int l_include(lua_State* L) {
+        const char* name = luaL_checkstring(L, -1);
+        ExecuteResult result = runPluginFile(name);
+
+        if (result != ExecuteResult::Ok) {
+            if (result == ExecuteResult::NotFound) {
+                return luaL_error(L, "Plugin '%s' not found", name);
+            }
+
+            return 0;
+        }
+
+        callPluginFunction("Include", 1);
+
+        return 1;
+    }
+
     #pragma endregion
 
     const luaL_Reg lib[] = {
         { "ParseFlags", Plugins::l_parseFlags },
         { "SerializeFlags", Plugins::l_serializeFlags }
     };
+
+    void Register(lua_State* L) {
+        lua_register(L, "include", l_include);
+    }
 
     void Init(lua_State* L, int argc, char* argv[]) {
         Plugins::L = L;
@@ -83,25 +141,14 @@ namespace Plugins {
     }
 
     ExecuteResult Execute(std::string name) {
-        if (!name.ends_with(".lua")) {
-            name += ".lua";
+        ExecuteResult result = runPluginFile(name);
+
+        if (result != ExecuteResult::Ok) {
+            return result;
         }
 
-        fs::path path = Configuration::globalPluginsDirectory / name;
+        callPluginFunction("Command");
 
-        if (!fs::exists(path)) {
-            path = Configuration::relativePluginsDirectory / name;
-        }
-
-        if (fs::exists(path)) {
-            if (luaL_dofile(L, path.c_str()) != LUA_OK) {
-                printf("Error loading plugin (%s): %s\n", path.c_str(), lua_tostring(L, -1));
-                return ExecuteResult::Error;
-            }
-
-            return ExecuteResult::Ok;
-        }
-
-        return ExecuteResult::NotFound;
+        return ExecuteResult::Ok;
     }
 }

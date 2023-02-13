@@ -9,6 +9,7 @@ namespace Plugins {
         Error
     };
 
+    extern void Register(lua_State* L);
     extern void Init(lua_State* L, int argc, char* argv[]);
     extern ExecuteResult Execute(std::string name);
 };

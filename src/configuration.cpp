@@ -6,6 +6,7 @@
 #include <simdjson.h>
 #include <filesystem>
 namespace ondemand = simdjson::ondemand;
+namespace dom = simdjson::dom;
 namespace fs = std::filesystem;
 
 namespace Configuration {
@@ -33,6 +34,7 @@ namespace Configuration {
 
     const std::filesystem::path RELATIVE_CONFIGURATION_FILE = "smake.json";
     std::filesystem::path relativePluginsDirectory = "./plugins";
+    extern std::unordered_map<std::string_view, std::string_view> commands;
 
     #pragma endregion
 

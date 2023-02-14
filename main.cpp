@@ -2,7 +2,10 @@
 #include <api.hpp>
 #include <configuration.hpp>
 #include <iostream>
+<<<<<<< HEAD
 #include <cstring>
+=======
+>>>>>>> 841b0daed6149a5cd1f5e5c00d4a939a2eea8c5b
 
 void run(lua_State* L, int argc, char* argv[]) {
     // Plugin CLI

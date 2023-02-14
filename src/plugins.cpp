@@ -2,7 +2,10 @@
 #include <api.hpp>
 #include <configuration.hpp>
 #include <unistd.h>
+<<<<<<< HEAD
 #include <iostream>
+=======
+>>>>>>> 841b0daed6149a5cd1f5e5c00d4a939a2eea8c5b
 namespace fs = std::filesystem;
 
 // Uses sandboxed Lua state
@@ -90,6 +93,7 @@ namespace Plugins {
         return 1;
     }
 
+<<<<<<< HEAD
     void makeGlobal(lua_State* L, int idx) {
         lua_pushglobaltable(L);
 
@@ -121,6 +125,10 @@ namespace Plugins {
         }
 
         const char* name = luaL_checkstring(L, 1);
+=======
+    int l_include(lua_State* L) {
+        const char* name = luaL_checkstring(L, -1);
+>>>>>>> 841b0daed6149a5cd1f5e5c00d4a939a2eea8c5b
         lua_pop(L, 1);
 
         lua_newtable(L);
@@ -138,12 +146,17 @@ namespace Plugins {
             return 0;
         }
 
+<<<<<<< HEAD
         callPluginFunction("Import", LUA_MULTRET);
+=======
+        callPluginFunction("Include", LUA_MULTRET);
+>>>>>>> 841b0daed6149a5cd1f5e5c00d4a939a2eea8c5b
 
         // Remove Plugin from the environment
         lua_pushnil(L);
         lua_setglobal(L, "Plugin");
 
+<<<<<<< HEAD
         int nret = lua_gettop(L);
 
         // Make global if second argument is true
@@ -156,6 +169,9 @@ namespace Plugins {
         }
 
         return nret;
+=======
+        return lua_gettop(L);
+>>>>>>> 841b0daed6149a5cd1f5e5c00d4a939a2eea8c5b
     }
 
     #pragma endregion
@@ -166,7 +182,11 @@ namespace Plugins {
     };
 
     void Register(lua_State* L) {
+<<<<<<< HEAD
         lua_register(L, "import", l_import);
+=======
+        lua_register(L, "include", l_include);
+>>>>>>> 841b0daed6149a5cd1f5e5c00d4a939a2eea8c5b
     }
 
     void Init(lua_State* L, int argc, char* argv[]) {

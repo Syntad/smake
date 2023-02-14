@@ -109,7 +109,11 @@ function Plugin.Command()
     build()
 end
 
+<<<<<<< HEAD
 function Plugin.Import()
+=======
+function Plugin.Include()
+>>>>>>> 841b0daed6149a5cd1f5e5c00d4a939a2eea8c5b
     return {
         standard = standard,
         input = input,

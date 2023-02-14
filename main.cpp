@@ -3,6 +3,7 @@
 #include <api.hpp>
 #include <configuration.hpp>
 #include <unistd.h>
+#include <vector>
 #include <iostream>
 
 void run(lua_State* L, int argc, char* argv[]) {
@@ -43,26 +44,33 @@ void run(lua_State* L, int argc, char* argv[]) {
         }
     }
 
+    std::vector<const char*> args;
+
+    if (argc > 1) {
+        std::copy(&argv[1], &argv[argc], std::back_inserter(args));
+
+        for (int i = 0; i < args.size(); i++) {
+            if (!strcmp(args[i], "-f")) {
+                args.erase(args.begin() + i, args.begin() + i + 2);
+            }
+            else if (!strcmp(args[i], "-i") || !strcmp(args[i], "-b") || !strcmp(args[i], "-r")) {
+                args.erase(args.begin() + i);
+            }
+        }
+    }
+
     // Run
-    if (luaL_loadfile(L, file_name) != LUA_OK) {
-        printf("Error loading file: %s\n", lua_tostring(L, -1));
+    if (luaL_dofile(L, file_name) != LUA_OK) {
+        printf("Error executing file: %s\n", lua_tostring(L, -1));
         return;
     }
 
-    for (int i = 2; i < argc; i++) {
-        lua_pushstring(L, argv[i]);
-    }
-
-    if (lua_pcall(L, argc > 1 ? argc - 2 : 0, 0, 0) != LUA_OK) {
-        printf("Error: %s\n", lua_tostring(L, -1));
-    }
-
-    if (argc >= 2 && API::PushSmakeFunction(L, argv[1])) {
-        for (int i = 2; i < argc; i++) {
-            lua_pushstring(L, argv[i]);
+    if (!args.empty() && API::PushSmakeFunction(L, args[0])) {
+        for (int i = 1; i < args.size(); i++) {
+            lua_pushstring(L, args[i]);
         }
 
-        lua_call(L, argc - 2, 0);
+        lua_call(L, args.size() - 1, 0);
 
         return;
     }

@@ -42,6 +42,7 @@ namespace Plugins {
         lua_getglobal(L, "Plugin");
         lua_pushstring(L, name);
         lua_rawget(L, -2);
+        lua_remove(L, 1); // Remove Plugin table from stack
 
         if (lua_type(L, -1) == LUA_TFUNCTION) {
             lua_call(L, 0, r);
@@ -92,6 +93,13 @@ namespace Plugins {
 
     int l_include(lua_State* L) {
         const char* name = luaL_checkstring(L, -1);
+        lua_pop(L, 1);
+
+        lua_newtable(L);
+        lua_setglobal(L, "Plugin");
+
+        // Execute plugin
+
         ExecuteResult result = runPluginFile(name);
 
         if (result != ExecuteResult::Ok) {
@@ -102,9 +110,13 @@ namespace Plugins {
             return 0;
         }
 
-        callPluginFunction("Include", 1);
+        callPluginFunction("Include", LUA_MULTRET);
 
-        return 1;
+        // Remove Plugin from the environment
+        lua_pushnil(L);
+        lua_setglobal(L, "Plugin");
+
+        return lua_gettop(L);
     }
 
     #pragma endregion
@@ -122,11 +134,12 @@ namespace Plugins {
         Plugins::L = L;
         Plugins::argc = argc;
         Plugins::argv = argv;
+    }
+
+    ExecuteResult Execute(std::string name) {
+        // Setup lua state for CLI execution
 
         luaL_newlib(L, lib);
-
-        // Plugins.Arguments
-
         lua_pushstring(L, "Arguments");
         lua_createtable(L, argc, 0);
 
@@ -138,9 +151,8 @@ namespace Plugins {
         lua_settable(L, -3);
 
         lua_setglobal(L, "Plugin");
-    }
 
-    ExecuteResult Execute(std::string name) {
+        // Execute
         ExecuteResult result = runPluginFile(name);
 
         if (result != ExecuteResult::Ok) {

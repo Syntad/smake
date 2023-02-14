@@ -21,7 +21,7 @@ namespace API {
             system(commands.top().c_str());
             commands.pop();
         }
-        
+
         return 0;
     }
 

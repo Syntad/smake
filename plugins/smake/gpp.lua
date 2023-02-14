@@ -8,11 +8,11 @@ local settings = {
     output = nil
 }
 
-function standard(std)
+local function standard(std)
     settings.standard = std
 end
 
-function input(...)
+local function input(...)
     local args = { ... }
 
     for _, file in next, args do
@@ -20,7 +20,7 @@ function input(...)
     end
 end
 
-function include(include, path, name)
+local function include(include, path, name)
     if type(include) == 'table' then
         for _, include in next, include do
             settings.include[#settings.include + 1] = include
@@ -34,11 +34,11 @@ function include(include, path, name)
     settings.linkNames[#settings.linkNames + 1] = name
 end
 
-function output(file)
+local function output(file)
     settings.output = file
 end
 
-function flags(...)
+local function flags(...)
     local args = { ... }
 
     for _, flag in next, args do
@@ -46,9 +46,9 @@ function flags(...)
     end
 end
 
-function makeCommand()
+local function makeCommand()
     local cmd = 'g++';
-  
+
     if settings.standard then
         cmd = cmd .. ' -std=' .. settings.standard
     end
@@ -86,15 +86,30 @@ local function build()
     print('Built in ' .. (os.clock() - c) * 1000 .. 'ms')
 end
 
+local module = {
+    standard = standard,
+    input = input,
+    include = include,
+    output = output,
+    flags = flags,
+    build = build
+}
+
 function Plugin.Command()
     local file = Plugin.Arguments[1] or 'make.lua'
     local func = assert(loadfile(file), 'File does not exist')
+
+    for i, v in next, module do
+        if i ~= 'build' then
+            _G[i] = v
+        end
+    end
 
     func()
     build()
 end
 
-function Plugin.Include()
+function Plugin.Include(global)
     return {
         standard = standard,
         input = input,

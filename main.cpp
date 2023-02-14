@@ -6,7 +6,7 @@
 #include <iostream>
 
 void run(lua_State* L, int argc, char* argv[]) {
-    const char* file_name = "make.lua";
+    const char* file_name = "smake.lua";
 
     // Parse arguments
     int opt;

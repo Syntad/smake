@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/65922858/218616508-42fae26a-19a8-47f7-bd69-e04808fe60f4.png">
+  <img src="https://user-images.githubusercontent.com/65922858/218645150-c1719558-e44e-45c8-b396-f7c4ffc24729.png">
 </p>
 
 # Smake

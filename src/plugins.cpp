@@ -51,6 +51,20 @@ namespace Plugins {
         return false;
     }
 
+    void makeGlobal(lua_State* L, int idx) {
+        lua_pushglobaltable(L);
+
+        lua_pushnil(L);
+        while (lua_next(L, idx)) {
+            lua_pushvalue(L, -2);
+            lua_pushvalue(L, -2);
+            lua_rawset(L, -5);
+            lua_pop(L, 1);
+        }
+
+        lua_pop(L, 1);
+    }
+
     #pragma region Lua Functions
 
     int l_parseFlags(lua_State* L) {
@@ -88,20 +102,6 @@ namespace Plugins {
         lua_pushstring(L, serialized.c_str());
         
         return 1;
-    }
-
-    void makeGlobal(lua_State* L, int idx) {
-        lua_pushglobaltable(L);
-
-        lua_pushnil(L);
-        while (lua_next(L, idx)) {
-            lua_pushvalue(L, -2);
-            lua_pushvalue(L, -2);
-            lua_rawset(L, -5);
-            lua_pop(L, 1);
-        }
-
-        lua_pop(L, 1);
     }
 
     int l_import(lua_State* L) {

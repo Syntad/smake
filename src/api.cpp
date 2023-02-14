@@ -3,7 +3,10 @@
 #include <plugins.hpp>
 #include <string>
 #include <stack>
+#include <filesystem>
+#include <unistd.h>
 using std::string;
+namespace fs = std::filesystem;
 
 namespace API {
     #pragma region Lua Functions
@@ -25,6 +28,19 @@ namespace API {
         return 0;
     }
 
+    int l_runIn(lua_State* L) {
+        fs::path cwd = fs::current_path();
+
+        const char* path = luaL_checkstring(L, 1);
+        lua_remove(L, 1);
+
+        chdir(path);
+        l_run(L);
+        chdir(cwd.c_str());
+
+        return 0;
+    }
+
     #pragma endregion
 
     void Register(lua_State* L) {
@@ -38,6 +54,7 @@ namespace API {
         lua_setglobal(L, "smake");
 
         lua_register(L, "run", l_run);
+        lua_register(L, "runIn", l_runIn);
     }
 
     bool CallSmakeFunction(lua_State* L, const char* func) {

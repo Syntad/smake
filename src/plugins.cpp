@@ -58,6 +58,7 @@ namespace Plugins {
     int l_parseFlags(lua_State* L) {
         int opt;
         const char* optstring = luaL_checkstring(L, 1);
+        lua_settop(L, 0);
         optind = 3; // Reset to the argument after the plugin
 
         lua_newtable(L);

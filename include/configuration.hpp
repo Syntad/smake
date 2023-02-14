@@ -1,7 +1,6 @@
 #pragma once
 #include <string>
 #include <filesystem>
-#include <unordered_map>
 
 namespace Configuration
 {
@@ -16,4 +15,5 @@ namespace Configuration
     // Configuration
     extern std::filesystem::path globalPluginsDirectory;
     extern std::filesystem::path relativePluginsDirectory;
+    extern std::string smakeFileName;
 }

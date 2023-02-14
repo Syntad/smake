@@ -1,9 +1,6 @@
 #include <plugins.hpp>
 #include <api.hpp>
 #include <configuration.hpp>
-#include <unordered_map>
-#include <iostream>
-#include <filesystem>
 #include <unistd.h>
 namespace fs = std::filesystem;
 

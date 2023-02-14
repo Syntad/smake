@@ -34,7 +34,7 @@ namespace Configuration {
 
     const std::filesystem::path RELATIVE_CONFIGURATION_FILE = "smake.json";
     std::filesystem::path relativePluginsDirectory = "./plugins";
-    extern std::unordered_map<std::string_view, std::string_view> commands;
+    std::string smakeFileName = "smake.lua";
 
     #pragma endregion
 
@@ -47,10 +47,14 @@ namespace Configuration {
         simdjson::padded_string json = simdjson::padded_string::load(CONFIGURATION_PATH.string());
         ondemand::document config = parser.iterate(json);
 
-        std::string_view pluginsDirectory;
+        std::string_view pluginsDirectory, smakeFileName;
         
         if (config["pluginsDirectory"].get(pluginsDirectory) != simdjson::NO_SUCH_FIELD) {
             Configuration::globalPluginsDirectory = fs::path(pluginsDirectory);
+        }
+
+        if (config["smakeFileName"].get(smakeFileName) == simdjson::SUCCESS) {
+            Configuration::smakeFileName = std::string(smakeFileName);
         }
     }
 
@@ -63,10 +67,14 @@ namespace Configuration {
         simdjson::padded_string json = simdjson::padded_string::load(RELATIVE_CONFIGURATION_FILE.string());
         ondemand::document config = parser.iterate(json);
 
-        std::string_view pluginsDirectory;
+        std::string_view pluginsDirectory, smakeFileName;
         
-        if (config["pluginsDirectory"].get(pluginsDirectory) != simdjson::NO_SUCH_FIELD) {
+        if (config["pluginsDirectory"].get(pluginsDirectory) == simdjson::SUCCESS) {
             Configuration::relativePluginsDirectory = fs::path(pluginsDirectory);
+        }
+    
+        if (config["smakeFileName"].get(smakeFileName) == simdjson::SUCCESS) {
+            Configuration::smakeFileName = std::string(smakeFileName);
         }
     }
 

@@ -57,23 +57,45 @@ namespace API {
         lua_register(L, "runIn", l_runIn);
     }
 
-    bool CallSmakeFunction(lua_State* L, const char* func) {
+    bool IsSmakeFunction(lua_State* L, const char* func) {
         lua_getglobal(L, "smake");
 
         if (lua_type(L, -1) == LUA_TTABLE) {
             lua_pushstring(L, func);
             lua_rawget(L, -2);
-            
+
+            bool exists = lua_type(L, -1) == LUA_TFUNCTION;
+
+            lua_settop(L, 0);
+
+            return exists;
+        }
+
+        lua_pop(L, 1);
+        return false;
+    }
+
+    bool PushSmakeFunction(lua_State* L, const char* func) {
+        lua_getglobal(L, "smake");
+
+        if (lua_type(L, -1) == LUA_TTABLE) {
+            lua_pushstring(L, func);
+            lua_rawget(L, -2);
+
             if (lua_type(L, -1) == LUA_TFUNCTION) {
-                lua_call(L, 0, 0);
+                lua_remove(L, 1);
                 return true;
             }
-            else {
-                lua_pop(L, 1);
-            }
         }
-        else {
-            lua_pop(L, 1);
+
+        lua_pop(L, 1);
+        return false;
+    }
+
+    bool CallSmakeFunction(lua_State* L, const char* func) {
+        if (PushSmakeFunction(L, func)) {
+            lua_call(L, 0, 0);
+            return true;
         }
 
         return false;

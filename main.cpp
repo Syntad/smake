@@ -57,7 +57,13 @@ void run(lua_State* L, int argc, char* argv[]) {
         printf("Error: %s\n", lua_tostring(L, -1));
     }
 
-    if (argc == 2 && API::CallSmakeFunction(L, argv[1])) {
+    if (argc >= 2 && API::PushSmakeFunction(L, argv[1])) {
+        for (int i = 2; i < argc; i++) {
+            lua_pushstring(L, argv[i]);
+        }
+
+        lua_call(L, argc - 2, 0);
+
         return;
     }
 

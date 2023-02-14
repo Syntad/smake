@@ -3,7 +3,7 @@
 </p>
 
 # Smake
-Smake (Syntad Make) is a build helper using Lua as the scripting language
+Smake (Syntad Make) is an ultra fast build tool written in C++ using Lua as the scripting language with plugin support.
 
 [Install Smake](https://github.com/Syntad/smake/wiki/Installing) \
 [Smake Documentation](https://github.com/Syntad/smake/wiki)

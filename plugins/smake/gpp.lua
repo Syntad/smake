@@ -109,7 +109,7 @@ function Plugin.Command()
     build()
 end
 
-function Plugin.Include(global)
+function Plugin.Include()
     return {
         standard = standard,
         input = input,

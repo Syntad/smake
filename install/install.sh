@@ -1,3 +1,7 @@
+# Configuration
+InstallLocation="/usr/local/bin"
+AddToPath=true
+
 cd ..
 
 if [ ! -d "lua" ]; then
@@ -13,4 +17,13 @@ if [ ! -d "lua" ]; then
 fi
 
 g++ main.cpp src/*.cpp -std=c++2a -Iinclude -Llua -Ilua -llua -Idependencies/include -o smake
-sudo mv ./smake /usr/local/bin
+sudo mv ./smake $InstallLocation
+
+# Set up Smake app data
+SmakeAppData="$HOME/.smake"
+
+if [ ! -d $SmakeAppData ]; then
+    mkdir $SmakeAppData
+    mkdir "$SmakeAppData/plugins"
+    touch "$SmakeAppData/config.json"
+fi

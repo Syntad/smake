@@ -30,5 +30,7 @@ $SmakeAppData = "$env:APPDATA\Syntad\Smake" # DO NOT MODIFY
 if (-Not (Test-Path -Path $SmakeAppData)) {
     New-Item -Path $SmakeAppData -ItemType Directory # Create Syntad and/or Smake folder
     New-Item -Path (Join-Path -Path $SmakeAppData -ChildPath "plugins") -ItemType Directory # Make plugins folder
-    New-Item -Path (Join-Path -Path $SmakeAppData -ChildPath "config.json") # Make config.json
+    # Make config.json
+    New-Item -Path (Join-Path -Path $SmakeAppData -ChildPath "config.json")
+    Set-Content -Path (Join-Path -Path $SmakeAppData -ChildPath "config.json") -Value "{}"
 }

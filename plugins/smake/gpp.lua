@@ -108,8 +108,13 @@ local function generateCompileFlags()
     end
 
     local file = io.open('compile_flags.txt', 'w+')
-    file:write(flags)
-    file:close()
+
+    if file then
+        file:write(flags)
+        file:close()
+    else
+        print('Could not open compile_flags.txt for writing')
+    end
 end
 
 local function build()

@@ -124,7 +124,8 @@ local module = {
     include = include,
     output = output,
     flags = flags,
-    build = build
+    build = build,
+    generateCompileFlags = generateCompileFlags
 }
 
 function Plugin.Command()
@@ -142,13 +143,5 @@ function Plugin.Command()
 end
 
 function Plugin.Import()
-    return {
-        standard = standard,
-        input = input,
-        include = include,
-        output = output,
-        flags = flags,
-        build = build,
-        generateCompileFlags = generateCompileFlags
-    }
+    return module
 end

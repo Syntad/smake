@@ -54,7 +54,7 @@ local function makeCommand()
     end
 
     for _, input in next, settings.input do
-        cmd = cmd ..  ' ' .. input
+        cmd = cmd .. ' ' .. input
     end
 
     for _, include in next, settings.include do
@@ -100,7 +100,9 @@ local function generateCompileFlags()
     end
 
     for _, flag in next, settings.flags do
-        flags = flags .. flag .. '\n';
+        for f in flag:gmatch('%S+') do
+            flags = flags .. f .. '\n'
+        end
     end
 
     if settings.output then

@@ -66,18 +66,50 @@ local function makeCommand()
     end
 
     for _, name in next, settings.linkNames do
-        cmd = cmd .. ' -l' .. name;
+        cmd = cmd .. ' -l' .. name
     end
 
     for _, flag in next, settings.flags do
-        cmd = cmd .. ' ' .. flag;
+        cmd = cmd .. ' ' .. flag
     end
 
     if settings.output then
-        cmd = cmd .. ' -o' .. settings.output;
+        cmd = cmd .. ' -o' .. settings.output
     end
 
     return cmd;
+end
+
+local function generateCompileFlags()
+    local flags = ''
+
+    if settings.standard then
+        flags = flags .. '-std=' .. settings.standard .. '\n'
+    end
+
+    for _, include in next, settings.include do
+        flags = flags .. '-I\n' .. include .. '\n'
+    end
+
+    for _, link in next, settings.linkPaths do
+        flags = flags .. '-L\n' .. link .. '\n'
+    end
+
+    for _, name in next, settings.linkNames do
+        flags = flags .. '-l\n' .. name .. '\n'
+    end
+
+    for _, flag in next, settings.flags do
+        flags = flags .. flag .. '\n';
+    end
+
+    if settings.output then
+        flags = flags .. '-o\n' .. settings.output .. '\n'
+    end
+
+    local file = io.open('compile_flags.txt', 'w+')
+    file:write(flags)
+    file:close()
 end
 
 local function build()
@@ -116,6 +148,7 @@ function Plugin.Import()
         include = include,
         output = output,
         flags = flags,
-        build = build
+        build = build,
+        generateCompileFlags = generateCompileFlags
     }
 end

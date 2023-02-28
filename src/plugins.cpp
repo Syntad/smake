@@ -17,10 +17,10 @@ namespace Plugins {
             name += ".lua";
         }
 
-        fs::path path = Configuration::globalPluginsDirectory / name;
+        fs::path path = Configuration::relativePluginsDirectory / name;
 
         if (!fs::exists(path)) {
-            path = Configuration::relativePluginsDirectory / name;
+            path = Configuration::globalPluginsDirectory / name;
         }
 
         if (fs::exists(path)) {

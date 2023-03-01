@@ -155,7 +155,7 @@ namespace Plugins {
         // Remove Plugin from the environment or replace it with the backup if it exists
     
         if (pluginTableBackup != -1) {
-            lua_rotate(L, pluginTableBackup, lua_gettop(L) - pluginTableBackup + 1); // Move plugin table table backup to the top of the stack
+            lua_rotate(L, pluginTableBackup, lua_gettop(L) - pluginTableBackup); // Move plugin table table backup to the top of the stack
             lua_setglobal(L, "Plugin");
         }
         else {

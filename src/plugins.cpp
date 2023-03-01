@@ -40,7 +40,7 @@ namespace Plugins {
         lua_getglobal(L, "Plugin");
         lua_pushstring(L, name);
         lua_rawget(L, -2);
-        lua_remove(L, 1); // Remove Plugin table from stack
+        lua_remove(L, -2); // Remove Plugin table from stack
 
         if (lua_type(L, -1) == LUA_TFUNCTION) {
             lua_call(L, 0, r);
@@ -123,6 +123,18 @@ namespace Plugins {
         const char* name = luaL_checkstring(L, 1);
         lua_pop(L, 1);
 
+        // Setup new Plugin table and backup old one if it exists
+
+        int pluginTableBackup = -1;
+        lua_getglobal(L, "Plugin");
+
+        if (lua_type(L, -1) == LUA_TTABLE) {
+            pluginTableBackup = lua_gettop(L);
+        }
+        else {
+            lua_pop(L, 1);
+        }
+
         lua_newtable(L);
         lua_setglobal(L, "Plugin");
 
@@ -140,9 +152,16 @@ namespace Plugins {
 
         callPluginFunction("Import", LUA_MULTRET);
 
-        // Remove Plugin from the environment
-        lua_pushnil(L);
-        lua_setglobal(L, "Plugin");
+        // Remove Plugin from the environment or replace it with the backup if it exists
+    
+        if (pluginTableBackup != -1) {
+            lua_rotate(L, pluginTableBackup, lua_gettop(L) - pluginTableBackup + 1); // Move plugin table table backup to the top of the stack
+            lua_setglobal(L, "Plugin");
+        }
+        else {
+            lua_pushnil(L);
+            lua_setglobal(L, "Plugin");
+        }
 
         int nret = lua_gettop(L);
 

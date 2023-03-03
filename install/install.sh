@@ -1,6 +1,7 @@
 # Configuration
 InstallLocation="/usr/local/bin"
-AddToPath=true
+InstallPlugins=true
+InstallLibrary=true
 
 cd ..
 
@@ -25,5 +26,25 @@ SmakeAppData="$HOME/.smake"
 if [ ! -d $SmakeAppData ]; then
     mkdir $SmakeAppData
     mkdir "$SmakeAppData/plugins"
+
+    # Make config.json
     touch "$SmakeAppData/config.json"
+    printf '{}' > $HOME/.smake/config.json
+fi
+
+if [ $InstallPlugins ]; then
+    curl "https://github.com/Syntad/smake-plugins/archive/refs/heads/main.zip" -L -o plugins.zip
+    tar -xf plugins.zip
+    rm plugins.zip
+    rm -rf $HOME/.smake/plugins/smake
+    mv ./smake-plugins-main $HOME/.smake/plugins/smake
+fi
+
+if [ $InstallLibrary ]; then
+    curl "https://github.com/Syntad/smake-lsp-library/archive/refs/heads/main.zip" -L -o library.zip
+    tar -xf library.zip
+    rm library.zip
+    rm -rf $HOME/.smake/library
+    rm -rf ./smake-lsp-library-main/library/plugins
+    mv ./smake-lsp-library-main/library $HOME/.smake/library
 fi

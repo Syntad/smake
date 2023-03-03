@@ -5,19 +5,42 @@ InstallLibrary=true
 
 cd ..
 
-if [ ! -d "lua" ]; then
+if [ ! -d "./dependencies" ]; then
+    mkdir ./dependencies
+fi
+
+# Download and build lua
+if [ ! -d "./dependencies/lua" ]; then
     curl "https://www.lua.org/ftp/lua-5.4.4.tar.gz" -o ./lua-5.4.4.tar
     tar -xf ./lua-5.4.4.tar
     rm ./lua-5.4.4.tar
-    mv ./lua-5.4.4/src ./lua
-    rm -rf ./lua-5.4.4
-    cd lua
+    cd ./lua-5.4.4/src
     make
-    rm ./*.c
-    cd ..
+    cd ../..
+
+    mkdir dependencies/lua dependencies/lua/include dependencies/lua/lib
+
+    mv ./lua-5.4.4/src/*.h ./dependencies/lua/include
+    mv ./lua-5.4.4/src/*.hpp ./dependencies/lua/include
+    mv ./lua-5.4.4/src/*.a ./dependencies/lua/lib
+
+    rm -rf ./lua-5.4.4
 fi
 
-g++ main.cpp src/*.cpp -std=c++2a -Iinclude -Llua -Ilua -llua -Idependencies/include -o smake
+# Download RapidJSON
+if [ ! -d "./dependencies/rapidjson" ]; then
+    curl "https://github.com/Tencent/rapidjson/archive/refs/heads/master.zip" -L -o ./rapidjson.zip
+    tar -xf ./rapidjson.zip
+    rm ./rapidjson.zip
+    
+    mkdir ./dependencies/rapidjson
+
+    mv ./rapidjson-master/include ./dependencies/rapidjson/include
+
+    rm -rf ./rapidjson-master
+fi
+
+g++ main.cpp src/*.cpp -std=c++2a -Iinclude -Ldependencies/lua/lib -Idependencies/lua/include -llua -Idependencies/rapidjson/include -o smake
 sudo mv ./smake $InstallLocation
 
 # Set up Smake app data

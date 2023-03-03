@@ -1,6 +1,32 @@
 import('smake/gpp', true)
+import('smake/dependencyInstaller', true)
+
+local function installDependencies()
+    -- Lua
+    InstallDependency('lua', function(installer)
+        local folder = installer:DownloadAndUnzip('https://www.lua.org/ftp/lua-5.4.4.tar.gz')
+        folder:RunIn('cd src && make' .. (platform.is_windows and ' mingw' or ''))
+
+        installer:MakeIncludeFolder()
+        folder:MoveInclude('src/*.h')
+        folder:MoveInclude('src/*.hpp')
+
+        installer:MakeLibraryFolder()
+        folder:MoveLibrary('src/*.a')
+
+        folder:Delete()
+    end)
+
+    -- RapidJSON
+    InstallDependency('rapidjson', function(installer)
+        local folder = installer:DownloadAndUnzip('https://github.com/Tencent/rapidjson/archive/refs/tags/v1.1.0.zip')
+        folder:MoveInclude()
+        folder:Delete()
+    end)
+end
 
 function smake.build()
+    installDependencies()
 
     -- options
     standard('c++2a')
@@ -14,25 +40,12 @@ function smake.build()
         flags('-ldl')
     end
 
-    include('lua', 'lua', 'lua')
-
     -- dependencies
-    include('dependencies/include')
+    include('dependencies/lua/include', 'dependencies/lua/lib', 'lua')
+    include('dependencies/rapidjson/include')
 
     -- build
     input('main.cpp', 'src/*.cpp')
     output(platform.is_windows and 'smake.exe' or 'smake')
     build()
-end
-
-function smake.install()
-    run(
-        'curl "https://www.lua.org/ftp/lua-5.4.4.tar.gz" -o ./lua-5.4.4.tar',
-        'tar -xf ./lua-5.4.4.tar',
-        'rm ./lua-5.4.4.tar',
-        'mv ./lua-5.4.4/src ./lua',
-        'rm -rf ./lua-5.4.4',
-        'cd lua && make',
-        'rm ./lua/*.c'
-    )
 end

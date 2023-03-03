@@ -1,6 +1,7 @@
 .vscode
-out
-lua
+smake.exe
+dependencies
+library
 
 .*
 !/.gitignore

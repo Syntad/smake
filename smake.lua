@@ -19,7 +19,7 @@ local function installDependencies()
 
     -- RapidJSON
     InstallDependency('rapidjson', function(installer)
-        local folder = installer:DownloadAndUnzip('https://github.com/Tencent/rapidjson/archive/refs/tags/v1.1.0.zip')
+        local folder = installer:DownloadAndUnzip('https://github.com/Tencent/rapidjson/archive/refs/heads/master.zip')
         folder:MoveInclude()
         folder:Delete()
     end)

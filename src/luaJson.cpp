@@ -1,4 +1,5 @@
 #include <luaJson.hpp>
+#include <stdexcept>
 
 namespace LuaJSON {
     void pushJSONObject(lua_State* L, const rapidjson::Value& value) {

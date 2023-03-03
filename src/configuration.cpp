@@ -3,6 +3,8 @@
 #include <filesystem>
 #include <rapidjson/document.h>
 #include <rapidjson/istreamwrapper.h>
+#include <luaJson.hpp>
+#include <iostream>
 namespace fs = std::filesystem;
 
 namespace Configuration {
@@ -18,7 +20,7 @@ namespace Configuration {
         fs::path globalPluginsDirectory;
     #else
         fs::path APP_DATA = fs::path(getenv("HOME")) / ".smake";
-        fs::path CONFIGURATION_PATH = APP_DATA / "smake.json";
+        fs::path CONFIGURATION_PATH = APP_DATA / "config.json";
         fs::path globalPluginsDirectory = APP_DATA / "plugins";
     #endif
 
@@ -34,7 +36,7 @@ namespace Configuration {
         doc.ParseStream(streamWrapper);
     }
 
-    void loadGlobal() {
+    void loadGlobal(lua_State* L) {
         if (!fs::exists(CONFIGURATION_PATH)) {
             return;
         }
@@ -49,9 +51,18 @@ namespace Configuration {
         if (doc.HasMember("smakeFileName") && doc["smakeFileName"].IsString()) {
             smakeFileName = fs::path(doc["smakeFileName"].GetString());
         }
+
+        // Set global configuration
+        lua_getglobal(L, "smake");
+
+        lua_pushstring(L, "config");
+        LuaJSON::pushJSONValue(L, doc);
+        lua_rawset(L, -3);
+
+        lua_pop(L, 1);
     }
 
-    void loadLocal() {
+    void loadLocal(lua_State* L) {
         if (!fs::exists(RELATIVE_CONFIGURATION_FILE)) {
             return;
         }
@@ -66,15 +77,36 @@ namespace Configuration {
         if (doc.HasMember("smakeFileName") && doc["smakeFileName"].IsString()) {
             smakeFileName = fs::path(doc["smakeFileName"].GetString());
         }
+
+        // Merge configurations
+        
+        // Get config
+        lua_getglobal(L, "smake");
+        lua_pushstring(L, "config");
+        lua_rawget(L, -2);
+
+        // Push local config
+        LuaJSON::pushJSONValue(L, doc);
+
+        // Copy local config to global config
+        lua_pushnil(L);
+        while (lua_next(L, -2)) {
+            lua_pushvalue(L, -2); // clone key
+            lua_rotate(L, -2, 1); // move value to top
+            lua_rawset(L, -5);
+        }
+
+        // Clean stack
+        lua_pop(L, 3);
     }
 
-    void Load() {
+    void Load(lua_State* L) {
         #if __CYGWIN__
             LPWSTR programDataPath;
 
             if (!SUCCEEDED(SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, NULL, &programDataPath)))
             {
-                throw std::runtime_error("Could not get App Data path");
+                throw std::runtime_error("Could not get AppData path");
             }
 
             Configuration::APP_DATA = fs::path(programDataPath) / "Syntad/Smake";
@@ -82,7 +114,7 @@ namespace Configuration {
             Configuration::globalPluginsDirectory = APP_DATA / "plugins";
         #endif
 
-        loadGlobal();
-        loadLocal();       
+        loadGlobal(L);
+        loadLocal(L);       
     }
 }

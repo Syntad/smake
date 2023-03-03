@@ -1,10 +1,11 @@
 #pragma once
 #include <string>
 #include <filesystem>
+#include <lua.hpp>
 
 namespace Configuration
 {
-    extern void Load();
+    extern void Load(lua_State* L);
 
     // Const
 

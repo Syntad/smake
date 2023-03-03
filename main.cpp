@@ -36,11 +36,10 @@ void run(lua_State* L, int argc, char* argv[]) {
 }
 
 int main(int argc, char *argv[]) {
-    Configuration::Load();
-
     lua_State* L = luaL_newstate();
     luaL_openlibs(L);
     API::Register(L);
+    Configuration::Load(L);
     Plugins::Init(L, argc, argv);
     run(L, argc, argv);
 

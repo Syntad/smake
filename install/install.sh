@@ -47,4 +47,5 @@ if [ $InstallLibrary ]; then
     rm -rf $HOME/.smake/library
     rm -rf ./smake-lsp-library-main/library/plugins
     mv ./smake-lsp-library-main/library $HOME/.smake/library
+    rm -rf ./smake-lsp-library-main
 fi

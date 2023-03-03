@@ -6,23 +6,48 @@ $InstallLibrary = $true
 
 Set-Location -Path ".."
 
-if (-Not (Test-Path -Path "lua")) {
+if (-Not (Test-Path -Path "./dependencies")) {
+    New-Item -Path "./dependencies" -ItemType Directory
+}
+
+# Download and build Lua
+if (-Not (Test-Path -Path "./dependencies/lua")) {
     Invoke-WebRequest -Uri "https://www.lua.org/ftp/lua-5.4.4.tar.gz" -OutFile "./lua-5.4.4.tar"
     tar -xf ./lua-5.4.4.tar
     Remove-Item "./lua-5.4.4.tar"
-    Move-Item -Path "./lua-5.4.4/src" -Destination "./lua"
-    Remove-Item "./lua-5.4.4" -Recurse
-    Set-Location -Path "./lua"
+    Set-Location "./lua-5.4.4/src"
     make mingw
-    Remove-Item "./*.c"
-    Set-Location -Path ".."
+    Set-Location -Path "../.."
+
+    New-Item -Path "./dependencies/lua" -ItemType Directory
+    New-Item -Path "./dependencies/lua/include" -ItemType Directory
+    New-Item -Path "./dependencies/lua/lib" -ItemType Directory
+
+    Move-Item -Path "./lua-5.4.4/src/*.h" -Destination "./dependencies/lua/include"
+    Move-Item -Path "./lua-5.4.4/src/*.hpp" -Destination "./dependencies/lua/include"
+    Move-Item -Path "./lua-5.4.4/src/*.a" -Destination "./dependencies/lua/lib"
+
+    Remove-Item -Path "./lua-5.4.4" -Recurse
+}
+
+# Download RapidJSON
+if (-Not (Test-Path -Path "./dependencies/rapidjson")) {
+    Invoke-WebRequest -Uri "https://github.com/Tencent/rapidjson/archive/refs/heads/master.zip" -OutFile "./rapidjson.zip"
+    tar -xf ./rapidjson.zip
+    Remove-Item "./rapidjson.zip"
+
+    New-Item -Path "./dependencies/rapidjson" -ItemType Directory
+
+    Move-Item -Path "./rapidjson-master/include" -Destination "./dependencies/rapidjson/include"
+
+    Remove-Item -Path "./rapidjson-master" -Recurse
 }
 
 if (-Not (Test-Path -Path $InstallLocation)) {
     New-Item -Path $InstallLocation -ItemType Directory
 }
 
-g++ main.cpp src/*.cpp -std=c++2a -Iinclude -Llua -Ilua -llua -Idependencies/include -static-libgcc -static-libstdc++ -luuid -o smake.exe
+g++ main.cpp src/*.cpp -std=c++2a -Iinclude -Ldependencies/lua/lib -Idependencies/lua/include -llua -Idependencies/rapidjson/include -static-libgcc -static-libstdc++ -luuid -o smake.exe
 Move-Item -Force -Path "./smake.exe" -Destination $InstallLocation
 
 Set-Location -Path "./install" # Move back into install directory

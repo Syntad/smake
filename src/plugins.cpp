@@ -5,8 +5,6 @@
 #include <iostream>
 namespace fs = std::filesystem;
 
-// Uses sandboxed Lua state
-
 namespace Plugins {
     lua_State* L;
     int argc;

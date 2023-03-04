@@ -46,6 +46,8 @@ namespace Plugins {
             return true;
         }
 
+        lua_pop(L, 1);
+
         return false;
     }
 
@@ -201,7 +203,7 @@ namespace Plugins {
 
         // Set Plugin.Arguments
         lua_pushstring(L, "Arguments");
-        lua_createtable(L, argc, 0);
+        lua_createtable(L, argc - 3, 0);
 
         for (int i = 3; i < argc; i++) {
             lua_pushstring(L, argv[i]);

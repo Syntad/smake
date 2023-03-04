@@ -47,10 +47,13 @@ if (-Not (Test-Path -Path $InstallLocation)) {
     New-Item -Path $InstallLocation -ItemType Directory
 }
 
+Write-Output "Building Smake"
 g++ main.cpp src/*.cpp -std=c++2a -Iinclude -Ldependencies/lua/lib -Idependencies/lua/include -llua -Idependencies/rapidjson/include -static-libgcc -static-libstdc++ -luuid -o smake.exe
 Move-Item -Force -Path "./smake.exe" -Destination $InstallLocation
 
 Set-Location -Path "./install" # Move back into install directory
+
+Write-Output "Installed Smake"
 
 # Set up Smake app data
 $SmakeAppData = "$env:APPDATA\Syntad\Smake" # DO NOT MODIFY
@@ -62,6 +65,8 @@ if (-Not (Test-Path -Path $SmakeAppData)) {
     # Make config.json
     New-Item -Path (Join-Path -Path $SmakeAppData -ChildPath "config.json")
     Set-Content -Path (Join-Path -Path $SmakeAppData -ChildPath "config.json") -Value "{}"
+
+    Write-Output "Finished setting up Smake app data"
 }
 
 if ($InstallPlugins) {
@@ -76,6 +81,8 @@ if ($InstallPlugins) {
     }
 
     Move-Item -Path "./smake-plugins-main" -Destination $OfficialPluginsDir
+
+    Write-Output "Installed Smake plugins"
 }
 
 if ($InstallLibrary) {
@@ -92,4 +99,8 @@ if ($InstallLibrary) {
 
     Move-Item -Path "./smake-lsp-library-main/library" -Destination $LibraryDir
     Remove-Item -Path "./smake-lsp-library-main" -Recurse
+
+    Write-Output "Installed Smake library"
 }
+
+Write-Output "Smake installed successfully"

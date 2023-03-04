@@ -181,7 +181,8 @@ namespace Plugins {
 
     const luaL_Reg lib[] = {
         { "ParseFlags", Plugins::l_parseFlags },
-        { "SerializeFlags", Plugins::l_serializeFlags }
+        { "SerializeFlags", Plugins::l_serializeFlags },
+        { NULL, NULL }
     };
 
     void Register(lua_State* L) {
@@ -198,6 +199,9 @@ namespace Plugins {
         // Setup lua state for CLI execution
 
         luaL_newlib(L, lib);
+        lua_newtable(L);
+
+        // Set Plugin.Arguments
         lua_pushstring(L, "Arguments");
         lua_createtable(L, argc, 0);
 
@@ -208,6 +212,7 @@ namespace Plugins {
 
         lua_settable(L, -3);
 
+        // Make Plugin library global
         lua_setglobal(L, "Plugin");
 
         // Execute

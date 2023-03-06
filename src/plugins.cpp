@@ -34,19 +34,26 @@ namespace Plugins {
         return ExecuteResult::NotFound;
     }
 
-    bool callPluginFunction(const char* name, int r = 0) {
+    bool pushPluginFunction(const char* name, int r = 0, bool pushArgs = false) {
         lua_getglobal(L, "Plugin");
         lua_pushstring(L, name);
         lua_rawget(L, -2);
         lua_remove(L, -2); // Remove Plugin table from stack
 
         if (lua_type(L, -1) == LUA_TFUNCTION) {
-            lua_call(L, 0, r);
-
             return true;
         }
 
         lua_pop(L, 1);
+
+        return false;
+    }
+
+    bool callPluginFunction(const char* name, int n, int r) {
+        if (pushPluginFunction(name)) {
+            lua_call(L, n, r); // pushArgs ? argc - 3 : 0
+            return true;
+        }
 
         return false;
     }
@@ -150,7 +157,7 @@ namespace Plugins {
             return 0;
         }
 
-        callPluginFunction("Import", LUA_MULTRET);
+        callPluginFunction("Import", 0, LUA_MULTRET);
 
         // Remove Plugin from the environment or replace it with the backup if it exists
     
@@ -201,17 +208,6 @@ namespace Plugins {
         luaL_newlib(L, lib);
         lua_newtable(L);
 
-        // Set Plugin.Arguments
-        lua_pushstring(L, "Arguments");
-        lua_createtable(L, argc - 3, 0);
-
-        for (int i = 3; i < argc; i++) {
-            lua_pushstring(L, argv[i]);
-            lua_rawseti(L, -2, i - 2);
-        }
-
-        lua_settable(L, -3);
-
         // Make Plugin library global
         lua_setglobal(L, "Plugin");
 
@@ -222,7 +218,14 @@ namespace Plugins {
             return result;
         }
 
-        callPluginFunction("Command");
+        if (pushPluginFunction("Command")) {
+            // Push arguments
+            for (int i = 3; i < argc; i++) {
+                lua_pushstring(L, argv[i]);
+            }
+
+            lua_call(L, argc - 3, 0);
+        }
 
         return ExecuteResult::Ok;
     }

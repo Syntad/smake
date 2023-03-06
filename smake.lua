@@ -1,3 +1,4 @@
+local import = import('smake/libraryInstaller')
 import('smake/gpp', true)
 import('smake/dependencyInstaller', true)
 

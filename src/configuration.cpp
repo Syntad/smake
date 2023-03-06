@@ -56,7 +56,7 @@ namespace Configuration {
         lua_getglobal(L, "smake");
 
         lua_pushstring(L, "config");
-        LuaJSON::pushJSONValue(L, doc);
+        LuaJSON::PushJSONValue(L, doc);
         lua_rawset(L, -3);
 
         lua_pop(L, 1);
@@ -86,7 +86,7 @@ namespace Configuration {
         lua_rawget(L, -2);
 
         // Push local config
-        LuaJSON::pushJSONValue(L, doc);
+        LuaJSON::PushJSONValue(L, doc);
 
         // Copy local config to global config
         lua_pushnil(L);

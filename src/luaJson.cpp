@@ -11,7 +11,7 @@ namespace LuaJSON {
 
         for (rapidjson::Value::ConstMemberIterator it = value.MemberBegin(); it != value.MemberEnd(); it++) {
             lua_pushstring(L, it->name.GetString());
-            LuaJSON::pushJSONValue(L, it->value);
+            LuaJSON::PushJSONValue(L, it->value);
             lua_rawset(L, -3);
         }
     }
@@ -25,7 +25,7 @@ namespace LuaJSON {
 
         int i = 0;
         for (rapidjson::Value::ConstValueIterator it = value.Begin(); it != value.End(); it++) {
-            LuaJSON::pushJSONValue(L, *it);
+            LuaJSON::PushJSONValue(L, *it);
             lua_rawseti(L, -2, ++i);
         }
     }
@@ -42,7 +42,7 @@ namespace LuaJSON {
         }
     }
 
-    void pushJSONValue(lua_State* L, const rapidjson::Value& value) {
+    void PushJSONValue(lua_State* L, const rapidjson::Value& value) {
         switch (value.GetType()) {
             case rapidjson::Type::kNullType: lua_pushnil(L); break;
             case rapidjson::Type::kFalseType: lua_pushboolean(L, false); break;

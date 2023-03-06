@@ -40,8 +40,8 @@ if [ ! -d "./dependencies/rapidjson" ]; then
     rm -rf ./rapidjson-master
 fi
 
-g++ main.cpp src/*.cpp -std=c++2a -Iinclude -Ldependencies/lua/lib -Idependencies/lua/include -llua -Idependencies/rapidjson/include -o smake
-sudo mv ./smake $InstallLocation
+g++ main.cpp src/*.cpp -std=c++2a -Iinclude -Ldependencies/lua/lib -Idependencies/lua/include -llua -Idependencies/rapidjson/include -o smake.o
+sudo mv ./smake.o "$InstallLocation/smake"
 
 # Set up Smake app data
 SmakeAppData="$HOME/.smake"

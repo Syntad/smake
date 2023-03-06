@@ -46,6 +46,6 @@ function smake.build()
 
     -- build
     input('main.cpp', 'src/*.cpp')
-    output(platform.is_windows and 'smake.exe' or 'smake')
+    output(platform.is_windows and 'smake.exe' or 'smake.o')
     build()
 end

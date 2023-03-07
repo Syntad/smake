@@ -33,10 +33,10 @@ namespace API {
     int l_runIn(lua_State* L) {
         fs::path cwd = fs::current_path();
 
-        const char* path = luaL_checkstring(L, 1);
+        string path(luaL_checkstring(L, 1));
         lua_remove(L, 1);
 
-        chdir(path);
+        chdir(path.c_str());
         l_run(L);
         chdir(cwd.c_str());
 

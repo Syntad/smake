@@ -3,6 +3,7 @@
 #include <chrono>
 #include <vector>
 #include <string>
+#include <iostream>
 
 namespace Spinner {
     std::thread thread;
@@ -18,10 +19,19 @@ namespace Spinner {
         std::cout << "\u001b[?25h";
     }
 
+    void clearLine() {
+        std::cout << "\33[2K\r";
+    }
+
     int l_start(lua_State* L) {
-        const char* text = luaL_checkstring(L, -1);
+        if (running) {
+            l_stop(L);
+            return luaL_error(L, "Attempted to start a spinner when the previous one has not been stopped");
+        }
+
+        std::string text(luaL_checkstring(L, -1));
         lua_pop(L, 1);
-        
+
         // Get smake.spinner
         lua_getglobal(L, "smake");
         lua_pushstring(L, "spinner");
@@ -86,8 +96,6 @@ namespace Spinner {
                 std::cout.flush();
                 std::this_thread::sleep_for(std::chrono::duration<double, std::chrono::seconds::period>(interval));
             }
-
-            showCursor();
         });
 
         return 0;
@@ -98,6 +106,16 @@ namespace Spinner {
 
         if (thread.joinable()) {
             thread.join();
+        }
+
+        showCursor();
+        clearLine();
+
+        if (lua_gettop(L) > 0) {
+            std::string text(luaL_checkstring(L, -1));
+            lua_settop(L, 0);
+
+            std::cout << text << std::endl;
         }
 
         return 0;

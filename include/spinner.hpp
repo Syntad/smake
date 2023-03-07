@@ -1,7 +1,5 @@
 #pragma once
 #include <lua.hpp>
-#include <iostream>
-#include <exception>
 
 namespace Spinner {
     extern int l_start(lua_State* L);

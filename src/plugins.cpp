@@ -10,7 +10,7 @@ namespace Plugins {
     int argc;
     char** argv;
 
-    ExecuteResult runPluginFile(std::string name) {
+    ExecuteResult runPluginFile(std::string& name) {
         if (!name.ends_with(".lua")) {
             name += ".lua";
         }
@@ -76,13 +76,13 @@ namespace Plugins {
 
     int l_parseFlags(lua_State* L) {
         int opt;
-        const char* optstring = luaL_checkstring(L, 1);
+        std::string optstring(luaL_checkstring(L, 1));
         lua_settop(L, 0);
         optind = 3; // Reset to the argument after the plugin
 
         lua_newtable(L);
 
-        while ((opt = getopt(argc, argv, optstring)) != -1) {
+        while ((opt = getopt(argc, argv, optstring.c_str())) != -1) {
             lua_pushstring(L, (char*)&opt);
 
             if (optarg) {
@@ -122,12 +122,17 @@ namespace Plugins {
         bool global = false;
 
         if (nargs == 2) {
-            luaL_checktype(L, 2, LUA_TBOOLEAN);
-            global = lua_toboolean(L, 2);
-            lua_pop(L, 1);
+            if (lua_isnil(L, 2)) {
+                lua_pop(L, 1);
+            }
+            else {
+                luaL_checktype(L, 2, LUA_TBOOLEAN);
+                global = lua_toboolean(L, 2);
+                lua_pop(L, 1);
+            }
         }
 
-        const char* name = luaL_checkstring(L, 1);
+        std::string name(luaL_checkstring(L, 1));
         lua_pop(L, 1);
 
         // Setup new Plugin table and backup old one if it exists
@@ -151,7 +156,7 @@ namespace Plugins {
 
         if (result != ExecuteResult::Ok) {
             if (result == ExecuteResult::NotFound) {
-                return luaL_error(L, "Plugin '%s' not found", name);
+                return luaL_error(L, "Plugin '%s' not found", name.c_str());
             }
 
             return 0;

@@ -79,11 +79,11 @@ namespace Spinner {
         lua_pushstring(L, "interval");
         lua_rawget(L, -2);
 
-        if (!lua_isnumber(L, -1)) {
-            return luaL_error(L, "smake.spinner.interval must be a number");
+        if (!lua_isinteger(L, -1)) {
+            return luaL_error(L, "smake.spinner.interval must be an integer");
         }
 
-        double interval = lua_tonumber(L, -1);
+        int interval = lua_tointeger(L, -1);
         lua_pop(L, 1);
 
         if (!interval) {
@@ -105,7 +105,7 @@ namespace Spinner {
 
                 std::cout << symbols[i] << " " << text << " \r";
                 std::cout.flush();
-                std::this_thread::sleep_for(std::chrono::duration<double, std::chrono::seconds::period>(interval));
+                std::this_thread::sleep_for(std::chrono::milliseconds(interval));
             }
         });
 

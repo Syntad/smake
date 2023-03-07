@@ -3,14 +3,16 @@ local spinner = import('smake/enhancedSpinner')
 import('smake/gpp', true)
 import('smake/dependencyInstaller', true)
 
-spinner.SetOptions({
-    symbols = { '🕛', '🕐', '🕑', '🕒', '🕓', '🕔', '🕕', '🕖', '🕗', '🕘', '🕙', '🕚' },
-    interval = 0.15
-})
+spinner.SetOptions({ symbols = 'clock' })
+
+local function benchmark(func, ...)
+    local c = os.time()
+    func(...)
+    return (os.time() - c) * 1000
+end
+
 
 local function installDependencies()
-    spinner.SetText('Installing Dependencies').Start()
-
     -- Lua
     InstallDependency('lua', function(installer)
         local folder = installer:DownloadAndUnzip('https://www.lua.org/ftp/lua-5.4.4.tar.gz')
@@ -32,12 +34,12 @@ local function installDependencies()
         folder:MoveInclude()
         folder:Delete()
     end)
-
-    spinner.Stop()
 end
 
 function smake.build()
-    installDependencies()
+    spinner.Start('Installing Dependencies')
+    local time = benchmark(installDependencies)
+    spinner.Stop('✅ Installed in ' .. time .. 'ms')
 
     -- options
     standard('c++2a')
@@ -59,9 +61,7 @@ function smake.build()
     input('main.cpp', 'src/*.cpp')
     output(platform.is_windows and 'smake.exe' or 'smake.o')
 
-    local c = os.clock()
-    spinner.SetText('Building').Start()
-    build()
-    spinner.Stop()
-    print('✅ Built in ' .. (os.clock() - c) * 1000 .. 'ms')
+    spinner.Start('Building')
+    local time = benchmark(os.execute, 'sleep 5')
+    spinner.Stop('✅ Built in ' .. time .. 'ms')
 end

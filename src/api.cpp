@@ -1,10 +1,12 @@
 #include <api.hpp>
 #include <platform.hpp>
 #include <plugins.hpp>
+#include <spinner.hpp>
 #include <string>
 #include <stack>
 #include <filesystem>
 #include <unistd.h>
+#include <thread>
 using std::string;
 namespace fs = std::filesystem;
 
@@ -41,30 +43,50 @@ namespace API {
         return 0;
     }
 
+    int l_runInThread(lua_State* L) {
+        std::stack<string> commands;
+        int nargs = lua_gettop(L);
+
+        for (int i = 0; i < nargs; i++) {
+            commands.push(luaL_checkstring(L, -1));
+            lua_pop(L, 1);
+        }
+
+        std::thread([commands]() mutable {
+            while (!commands.empty()) {
+                system(commands.top().c_str());
+                commands.pop();
+            }
+        });
+
+        return 0;
+    }
+
     #pragma endregion
 
     void Register(lua_State* L) {
-
-        // Classes
-        Platform::Register(L);
-        Plugins::Register(L);
-
         // Globals
         lua_newtable(L);
         lua_setglobal(L, "smake");
 
         lua_register(L, "run", l_run);
         lua_register(L, "runIn", l_runIn);
+        lua_register(L, "runInThread", l_runInThread);
+
+        // Classes
+        Platform::Register(L);
+        Plugins::Register(L);
+        Spinner::Register(L);
     }
 
     bool PushSmakeFunction(lua_State* L, const char* func) {
         lua_getglobal(L, "smake");
 
-        if (lua_type(L, -1) == LUA_TTABLE) {
+        if (lua_istable(L, -1)) {
             lua_pushstring(L, func);
             lua_rawget(L, -2);
 
-            if (lua_type(L, -1) == LUA_TFUNCTION) {
+            if (lua_isfunction(L, -1)) {
                 lua_remove(L, 1);
                 return true;
             }

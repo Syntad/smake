@@ -1,7 +1,7 @@
 .vscode
 smake.exe
 dependencies
-library
+smake/library
 
 .*
 !/.gitignore

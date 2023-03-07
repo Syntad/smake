@@ -40,7 +40,7 @@ namespace Plugins {
         lua_rawget(L, -2);
         lua_remove(L, -2); // Remove Plugin table from stack
 
-        if (lua_type(L, -1) == LUA_TFUNCTION) {
+        if (lua_isfunction(L, -1)) {
             return true;
         }
 
@@ -135,7 +135,7 @@ namespace Plugins {
         int pluginTableBackup = -1;
         lua_getglobal(L, "Plugin");
 
-        if (lua_type(L, -1) == LUA_TTABLE) {
+        if (lua_istable(L, -1)) {
             pluginTableBackup = lua_gettop(L);
         }
         else {
@@ -175,7 +175,7 @@ namespace Plugins {
         // Make global if second argument is true
         if (global) {
             for (int i = 1; i <= nret; i++) {
-                if (lua_type(L, i) == LUA_TTABLE) {
+                if (lua_istable(L, i)) {
                     makeGlobal(L, i);
                 }
             }

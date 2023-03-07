@@ -8,6 +8,7 @@
 namespace Spinner {
     std::thread thread;
     bool running;
+    std::string text;
 
     void hideCursor()
     {
@@ -23,13 +24,33 @@ namespace Spinner {
         std::cout << "\33[2K\r";
     }
 
+    int l_stop(lua_State* L) {
+        running = false;
+
+        if (thread.joinable()) {
+            thread.join();
+        }
+
+        showCursor();
+        clearLine();
+
+        if (lua_gettop(L) > 0) {
+            std::string text(luaL_checkstring(L, -1));
+            lua_settop(L, 0);
+
+            std::cout << text << std::endl;
+        }
+
+        return 0;
+    }
+
     int l_start(lua_State* L) {
         if (running) {
             l_stop(L);
             return luaL_error(L, "Attempted to start a spinner when the previous one has not been stopped");
         }
 
-        std::string text(luaL_checkstring(L, -1));
+        text = std::string(luaL_checkstring(L, -1));
         lua_pop(L, 1);
 
         // Get smake.spinner
@@ -82,7 +103,7 @@ namespace Spinner {
         running = true;
 
         // TODO: Make this shit work
-        thread = std::thread([&, text, symbolsLen, symbols, interval]() {
+        thread = std::thread([&, symbolsLen, symbols, interval]() {
             hideCursor();
 
             int i = 0;
@@ -101,22 +122,9 @@ namespace Spinner {
         return 0;
     }
 
-    int l_stop(lua_State* L) {
-        running = false;
-
-        if (thread.joinable()) {
-            thread.join();
-        }
-
-        showCursor();
-        clearLine();
-
-        if (lua_gettop(L) > 0) {
-            std::string text(luaL_checkstring(L, -1));
-            lua_settop(L, 0);
-
-            std::cout << text << std::endl;
-        }
+    int l_setText(lua_State* L) {
+        text = std::string(luaL_checkstring(L, -1));
+        lua_pop(L, 1);
 
         return 0;
     }
@@ -124,6 +132,7 @@ namespace Spinner {
     const luaL_Reg lib[] {
         { "start", Spinner::l_start },
         { "stop", Spinner::l_stop },
+        { "setText", Spinner::l_setText },
         { NULL, NULL }
     };
 

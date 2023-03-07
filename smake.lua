@@ -1,3 +1,4 @@
+---@diagnostic disable: need-check-nil
 local import = import('smake/libraryInstaller')
 local spinner = import('smake/enhancedSpinner')
 import('smake/gpp', true)
@@ -56,5 +57,5 @@ function smake.build()
 
     spinner.Start('Building')
     build()
-    spinner.Stop('✅ Built Smake')
+    spinner.Stop('✅ Built')
 end

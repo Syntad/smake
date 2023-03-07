@@ -1,5 +1,6 @@
 .vscode
 smake.exe
+smake.o
 dependencies
 smake/library
 

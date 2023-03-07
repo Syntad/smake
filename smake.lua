@@ -5,13 +5,6 @@ import('smake/dependencyInstaller', true)
 
 spinner.SetOptions({ symbols = 'clock' })
 
-local function benchmark(func, ...)
-    local c = os.time()
-    func(...)
-    return (os.time() - c) * 1000
-end
-
-
 local function installDependencies()
     -- Lua
     InstallDependency('lua', function(installer)
@@ -38,8 +31,8 @@ end
 
 function smake.build()
     spinner.Start('Installing Dependencies')
-    local time = benchmark(installDependencies)
-    spinner.Stop('✅ Installed in ' .. time .. 'ms')
+    installDependencies()
+    spinner.Stop('✅ Installed Dependencies')
 
     -- options
     standard('c++2a')
@@ -62,6 +55,6 @@ function smake.build()
     output(platform.is_windows and 'smake.exe' or 'smake.o')
 
     spinner.Start('Building')
-    local time = benchmark(os.execute, 'sleep 5')
-    spinner.Stop('✅ Built in ' .. time .. 'ms')
+    build()
+    spinner.Stop('✅ Built Smake')
 end

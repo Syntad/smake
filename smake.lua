@@ -1,12 +1,20 @@
 local import = import('smake/libraryInstaller')
+local spinner = import('smake/enhancedSpinner')
 import('smake/gpp', true)
 import('smake/dependencyInstaller', true)
 
+spinner.SetOptions({
+    symbols = { '🕛', '🕐', '🕑', '🕒', '🕓', '🕔', '🕕', '🕖', '🕗', '🕘', '🕙', '🕚' },
+    interval = 0.15
+})
+
 local function installDependencies()
+    spinner.SetText('Installing Dependencies').Start()
+
     -- Lua
     InstallDependency('lua', function(installer)
         local folder = installer:DownloadAndUnzip('https://www.lua.org/ftp/lua-5.4.4.tar.gz')
-        folder:RunIn('cd src && make' .. (platform.is_windows and ' mingw' or ''))
+        folder:RunIn('cd src && make' .. (platform.is_windows and ' mingw' or '') .. '> /dev/null > err.log')
 
         installer:MakeIncludeFolder()
         folder:MoveInclude('src/*.h')
@@ -24,6 +32,8 @@ local function installDependencies()
         folder:MoveInclude()
         folder:Delete()
     end)
+
+    spinner.Stop()
 end
 
 function smake.build()
@@ -49,5 +59,9 @@ function smake.build()
     input('main.cpp', 'src/*.cpp')
     output(platform.is_windows and 'smake.exe' or 'smake.o')
 
+    local c = os.clock()
+    spinner.SetText('Building').Start()
     build()
+    spinner.Stop()
+    print('✅ Built in ' .. (os.clock() - c) * 1000 .. 'ms')
 end

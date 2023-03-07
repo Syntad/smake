@@ -34,13 +34,6 @@ namespace Spinner {
         showCursor();
         clearLine();
 
-        if (lua_gettop(L) > 0) {
-            std::string text(luaL_checkstring(L, -1));
-            lua_settop(L, 0);
-
-            std::cout << text << std::endl;
-        }
-
         return 0;
     }
 
@@ -49,9 +42,6 @@ namespace Spinner {
             l_stop(L);
             return luaL_error(L, "Attempted to start a spinner when the previous one has not been stopped");
         }
-
-        text = std::string(luaL_checkstring(L, -1));
-        lua_pop(L, 1);
 
         // Get smake.spinner
         lua_getglobal(L, "smake");

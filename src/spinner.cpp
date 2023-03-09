@@ -92,7 +92,6 @@ namespace Spinner {
         
         running = true;
 
-        // TODO: Make this shit work
         thread = std::thread([&, symbolsLen, symbols, interval]() {
             hideCursor();
 

@@ -30,7 +30,7 @@ fi
 # Download RapidJSON
 if [ ! -d "./dependencies/rapidjson" ]; then
     curl "https://github.com/Tencent/rapidjson/archive/refs/heads/master.zip" -L -o ./rapidjson.zip
-    tar -xf ./rapidjson.zip
+    unzip -q ./rapidjson.zip
     rm ./rapidjson.zip
     
     mkdir ./dependencies/rapidjson
@@ -57,7 +57,7 @@ fi
 
 if [ $InstallPlugins ]; then
     curl "https://github.com/Syntad/smake-plugins/archive/refs/heads/main.zip" -L -o plugins.zip
-    tar -xf plugins.zip
+    unzip -q plugins.zip
     rm plugins.zip
     rm -rf $HOME/.smake/plugins/smake
     mv ./smake-plugins-main $HOME/.smake/plugins/smake
@@ -65,7 +65,7 @@ fi
 
 if [ $InstallLibrary ]; then
     curl "https://github.com/Syntad/smake-lsp-library/archive/refs/heads/main.zip" -L -o library.zip
-    tar -xf library.zip
+    unzip -q library.zip
     rm library.zip
     rm -rf $HOME/.smake/library
     rm -rf ./smake-lsp-library-main/library/plugins

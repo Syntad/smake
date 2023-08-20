@@ -3,6 +3,24 @@
 #include <configuration.hpp>
 #include <iostream>
 #include <cstring>
+#include <vector>
+#include <string>
+
+std::vector<std::string> getFunctionNames(lua_State* L) {
+    std::vector<std::string> names;
+    lua_getglobal(L, "smake");
+    lua_pushnil(L);
+
+    while (lua_next(L, -2)) {
+        if (lua_isfunction(L, -1) && lua_isstring(L, -2)) {
+            names.emplace_back(lua_tostring(L, -2));
+        }
+
+        lua_pop(L, 1);
+    }
+
+    return names;
+}
 
 void run(lua_State* L, int argc, char* argv[]) {
     // Plugin CLI
@@ -22,12 +40,27 @@ void run(lua_State* L, int argc, char* argv[]) {
         return;
     }
 
-    if (argc > 1 && API::PushSmakeFunction(L, argv[1])) {
-        for (int i = 2; i < argc; i++) {
-            lua_pushstring(L, argv[i]);
-        }
+    if (argc > 1) {
+        const char* argument = argv[1];
 
-        lua_call(L, argc - 2, 0);
+        if (API::PushSmakeFunction(L, argument)) { // Check for function first to allow overriding
+            for (int i = 2; i < argc; i++) {
+                lua_pushstring(L, argv[i]);
+            }
+
+            lua_call(L, argc - 2, 0);
+        }
+        else if (!strcmp(argument, "help") || !strcmp(argument, "--help")) {
+            std::string help =
+            "\033[4mFunctions\033[0m";
+            std::vector<std::string> names = getFunctionNames(L);
+
+            for (const auto& name : names) {
+                help += "\n- " + name;
+            }
+
+            std::cout << help << std::endl;
+        }
 
         return;
     }

@@ -97,15 +97,13 @@ namespace Spinner {
                     i = 0;
                 }
 
-                std::cout << symbols[i] << " " << text << " \r";
-                std::cout.flush();
+                std::cout << symbols[i] << " " << text << " \r" << std::flush;
                 std::this_thread::sleep_for(std::chrono::milliseconds(interval));
             }
 
             // Clear line
 
-            std::cout << std::string(symbols[i].length() + text.length() + 1, ' ') << '\r';
-            std::cout.flush();
+            std::cout << std::string(symbols[i].length() + text.length() + 1, ' ') << '\r' << std::flush;
         });
 
         return 0;

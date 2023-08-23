@@ -9,7 +9,7 @@ spinner.SetOptions({ symbols = 'clock' })
 local function installDependencies()
     -- Lua
     InstallDependency('lua', function(installer)
-        local folder = installer:DownloadAndUnzip('https://www.lua.org/ftp/lua-5.4.4.tar.gz')
+        local folder = installer:DownloadAndUntar('https://www.lua.org/ftp/lua-5.4.4.tar.gz')
         folder:RunIn('cd src && make' .. (platform.is_windows and ' mingw' or '') .. '> /dev/null > err.log')
 
         installer:MakeIncludeFolder()
@@ -46,6 +46,8 @@ function smake.build()
     elseif platform.is_linux then
         flags('-ldl')
     end
+
+    -- flags('-DUNICODE')
 
     -- dependencies
     include('dependencies/lua/include', 'dependencies/lua/lib', 'lua')

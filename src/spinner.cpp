@@ -20,10 +20,6 @@ namespace Spinner {
         std::cout << "\u001b[?25h";
     }
 
-    void clearLine() {
-        std::cout << "\33[2K\r";
-    }
-
     int l_stop(lua_State* L) {
         running = false;
 
@@ -32,7 +28,6 @@ namespace Spinner {
         }
 
         showCursor();
-        clearLine();
 
         return 0;
     }
@@ -106,6 +101,11 @@ namespace Spinner {
                 std::cout.flush();
                 std::this_thread::sleep_for(std::chrono::milliseconds(interval));
             }
+
+            // Clear line
+
+            std::cout << std::string(symbols[i].length() + text.length() + 1, ' ') << '\r';
+            std::cout.flush();
         });
 
         return 0;

@@ -47,8 +47,6 @@ function smake.build()
         flags('-ldl')
     end
 
-    -- flags('-DUNICODE')
-
     -- dependencies
     include('dependencies/lua/include', 'dependencies/lua/lib', 'lua')
     include('dependencies/rapidjson/include')

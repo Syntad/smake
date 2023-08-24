@@ -48,7 +48,7 @@ if (-Not (Test-Path -Path $InstallLocation)) {
 }
 
 Write-Output "Building Smake"
-g++ main.cpp src/*.cpp -std=c++2a -Iinclude -Ldependencies/lua/lib -Idependencies/lua/include -llua -Idependencies/rapidjson/include -static-libgcc -static-libstdc++ -luuid -o smake.exe
+g++ main.cpp src/*.cpp -std=c++2a -Iinclude -Ldependencies/lua/lib -Idependencies/lua/include -llua -Idependencies/rapidjson/include -static-libgcc -static-libstdc++ -luuid -lole32 -o smake.exe
 Move-Item -Force -Path "./smake.exe" -Destination $InstallLocation
 
 Set-Location -Path "./install" # Move back into install directory

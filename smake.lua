@@ -22,19 +22,20 @@ function smake.build()
     -- includes
     include('include')
 
-    if platform.is_windows then
-        flags('-static-libgcc -static-libstdc++ -luuid')
-    elseif platform.is_linux then
-        flags('-ldl')
-    end
-
     -- dependencies
     include('dependencies/lua/include', 'dependencies/lua/lib', 'lua')
     include('dependencies/rapidjson/include')
 
-    -- build
+    -- build files
     input('main.cpp', 'src/*.cpp')
     output(platform.is_windows and 'smake.exe' or 'smake.o')
+
+    -- flags
+    if platform.is_windows then
+        flags('-static-libgcc -static-libstdc++ -luuid -lole32')
+    elseif platform.is_linux then
+        flags('-ldl')
+    end
 
     spinner.Start('Building')
     build()

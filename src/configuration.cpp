@@ -63,7 +63,7 @@ namespace Configuration {
         if (doc.HasMember("aliases") && doc["aliases"].IsObject()) {
             rapidjson::GenericObject obj = doc["aliases"].GetObject();
 
-            for (rapidjson::Value::ConstMemberIterator itr = obj.MemberBegin(); itr != obj.MemberEnd(); ++itr) {   //iterate through object   
+            for (rapidjson::Value::ConstMemberIterator itr = obj.MemberBegin(); itr != obj.MemberEnd(); ++itr) {
                 const rapidjson::Value& objName = obj[itr->name.GetString()];
 
                 if (itr->name.IsString() && itr->value.IsString()) {

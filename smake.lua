@@ -1,43 +1,28 @@
 ---@diagnostic disable: need-check-nil
 local import = import('smake/libraryInstaller')
+---@type enhancedSpinner
 local spinner = import('smake/enhancedSpinner')
 import('smake/gpp', true)
 import('smake/dependencyInstaller', true)
+import('smake/dependencyIncluder', true)
 
 spinner.SetOptions({ symbols = 'clock' })
 
-local function installDependencies()
-    InstallDependency('lua')
-    InstallDependency('rapidjson')
-end
-
 function smake.build()
-    spinner.Start('Installing Dependencies')
-    installDependencies()
-    spinner.Stop('✅ Installed Dependencies')
+    spinner.Call(InstallDependencies, 'Installing Dependencies', '✅ Installed Dependencies', 'openssl', 'curl', 'lua', 'rapidjson')
 
-    -- options
     standard('c++2a')
-
-    -- includes
     include('include')
+    IncludeDependencies('lua', 'rapidjson', 'curl', 'openssl')
 
-    -- dependencies
-    include('dependencies/lua/include', 'dependencies/lua/lib', 'lua')
-    include('dependencies/rapidjson/include')
-
-    -- build files
     input('main.cpp', 'src/*.cpp')
     output(platform.is_windows and 'smake.exe' or 'smake.o')
 
-    -- flags
     if platform.is_windows then
         flags('-static-libgcc -static-libstdc++ -luuid -lole32')
     elseif platform.is_linux then
         flags('-ldl')
     end
 
-    spinner.Start('Building')
-    build()
-    spinner.Stop('✅ Built')
+    spinner.Call(build, 'Building', '✅ Built')
 end

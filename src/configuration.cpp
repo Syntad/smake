@@ -1,4 +1,5 @@
 #include <configuration.hpp>
+#include <installer.hpp>
 #include <fstream>
 #include <filesystem>
 #include <rapidjson/document.h>
@@ -10,23 +11,11 @@ namespace fs = std::filesystem;
 namespace Configuration {
     #pragma region Variables
 
-    #ifdef __CYGWIN__
-        #include <Windows.h>
-        #include <knownfolders.h>
-        #include <shlobj.h>
-
-        fs::path APP_DATA;
-        fs::path CONFIGURATION_PATH;
-        fs::path globalPluginsDirectory;
-    #else
-        fs::path APP_DATA = fs::path(getenv("HOME")) / ".smake";
-        fs::path CONFIGURATION_PATH = APP_DATA / "config.json";
-        fs::path globalPluginsDirectory = APP_DATA / "plugins";
-    #endif
-
     const std::filesystem::path RELATIVE_CONFIGURATION_FILE = "smake.json";
     std::filesystem::path relativePluginsDirectory = "./plugins";
     std::string smakeFileName = "smake.lua";
+    std::string defaultCommand = "build";
+    std::unordered_map<std::string, std::string> aliases;
 
     #pragma endregion
 
@@ -36,50 +25,15 @@ namespace Configuration {
         doc.ParseStream(streamWrapper);
     }
 
-    void loadGlobal(lua_State* L) {
-        if (!fs::exists(CONFIGURATION_PATH)) {
-            return;
-        }
-
-        rapidjson::Document doc;
-        parseJsonFile(doc, CONFIGURATION_PATH);
-
-        if (doc.HasMember("pluginsDirectory") && doc["pluginsDirectory"].IsString()) {
-            globalPluginsDirectory = fs::path(doc["pluginsDirectory"].GetString());
-        }
-
-        if (doc.HasMember("smakeFileName") && doc["smakeFileName"].IsString()) {
-            smakeFileName = fs::path(doc["smakeFileName"].GetString());
-        }
-
-        // Set global configuration
+    void setConfig(lua_State* L, const rapidjson::Document& doc) {
         lua_getglobal(L, "smake");
 
         lua_pushstring(L, "config");
         LuaJSON::PushJSONValue(L, doc);
         lua_rawset(L, -3);
-
-        lua_pop(L, 1);
     }
 
-    void loadLocal(lua_State* L) {
-        if (!fs::exists(RELATIVE_CONFIGURATION_FILE)) {
-            return;
-        }
-
-        rapidjson::Document doc;
-        parseJsonFile(doc, RELATIVE_CONFIGURATION_FILE);
-
-        if (doc.HasMember("pluginsDirectory") && doc["pluginsDirectory"].IsString()) {
-            relativePluginsDirectory = fs::path(doc["pluginsDirectory"].GetString());
-        }
-    
-        if (doc.HasMember("smakeFileName") && doc["smakeFileName"].IsString()) {
-            smakeFileName = fs::path(doc["smakeFileName"].GetString());
-        }
-
-        // Merge configurations
-        
+    void mergeConfig(lua_State* L, const rapidjson::Document& doc) {
         // Get config
         lua_getglobal(L, "smake");
         lua_pushstring(L, "config");
@@ -95,25 +49,64 @@ namespace Configuration {
             lua_rotate(L, -2, 1); // move value to top
             lua_rawset(L, -5);
         }
+    }
 
+    void loadShared(const rapidjson::Document& doc) {
+        if (doc.HasMember("smakeFileName") && doc["smakeFileName"].IsString()) {
+            smakeFileName = fs::path(doc["smakeFileName"].GetString());
+        }
+
+        if (doc.HasMember("defaultCommand") && doc["defaultCommand"].IsString()) {
+            defaultCommand = doc["defaultCommand"].GetString();
+        }
+
+        if (doc.HasMember("aliases") && doc["aliases"].IsObject()) {
+            rapidjson::GenericObject obj = doc["aliases"].GetObject();
+
+            for (rapidjson::Value::ConstMemberIterator itr = obj.MemberBegin(); itr != obj.MemberEnd(); ++itr) {   //iterate through object   
+                const rapidjson::Value& objName = obj[itr->name.GetString()];
+
+                if (itr->name.IsString() && itr->value.IsString()) {
+                    aliases[itr->name.GetString()] = itr->value.GetString();
+                }
+            }
+        }
+    }
+
+    void loadGlobal(lua_State* L) {
+        if (!fs::exists(Installer::CONFIGURATION_PATH)) {
+            return;
+        }
+
+        rapidjson::Document doc;
+        parseJsonFile(doc, Installer::CONFIGURATION_PATH);
+
+        loadShared(doc);
+        setConfig(L, doc);
+
+        lua_pop(L, 1);
+    }
+
+    void loadLocal(lua_State* L) {
+        if (!fs::exists(RELATIVE_CONFIGURATION_FILE)) {
+            return;
+        }
+
+        rapidjson::Document doc;
+        parseJsonFile(doc, RELATIVE_CONFIGURATION_FILE);
+
+        if (doc.HasMember("pluginsDirectory") && doc["pluginsDirectory"].IsString()) {
+            relativePluginsDirectory = fs::path(doc["pluginsDirectory"].GetString());
+        }
+
+        loadShared(doc);
+        mergeConfig(L, doc);
+        
         // Clean stack
         lua_pop(L, 3);
     }
 
     void Load(lua_State* L) {
-        #if __CYGWIN__
-            LPWSTR programDataPath;
-
-            if (!SUCCEEDED(SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, NULL, &programDataPath)))
-            {
-                throw std::runtime_error("Could not get AppData path");
-            }
-
-            Configuration::APP_DATA = fs::path(programDataPath) / "Syntad/Smake";
-            Configuration::CONFIGURATION_PATH = APP_DATA / "config.json";
-            Configuration::globalPluginsDirectory = APP_DATA / "plugins";
-        #endif
-
         loadGlobal(L);
         loadLocal(L);       
     }

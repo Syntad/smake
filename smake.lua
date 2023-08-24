@@ -7,27 +7,8 @@ import('smake/dependencyInstaller', true)
 spinner.SetOptions({ symbols = 'clock' })
 
 local function installDependencies()
-    -- Lua
-    InstallDependency('lua', function(installer)
-        local folder = installer:DownloadAndUntar('https://www.lua.org/ftp/lua-5.4.4.tar.gz')
-        folder:RunIn('cd src && make' .. (platform.is_windows and ' mingw' or '') .. '> /dev/null > err.log')
-
-        installer:MakeIncludeFolder()
-        folder:MoveInclude('src/*.h')
-        folder:MoveInclude('src/*.hpp')
-
-        installer:MakeLibraryFolder()
-        folder:MoveLibrary('src/*.a')
-
-        folder:Delete()
-    end)
-
-    -- RapidJSON
-    InstallDependency('rapidjson', function(installer)
-        local folder = installer:DownloadAndUnzip('https://github.com/Tencent/rapidjson/archive/refs/heads/master.zip')
-        folder:MoveInclude()
-        folder:Delete()
-    end)
+    InstallDependency('lua')
+    InstallDependency('rapidjson')
 end
 
 function smake.build()

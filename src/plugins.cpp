@@ -1,4 +1,5 @@
 #include <plugins.hpp>
+#include <installer.hpp>
 #include <api.hpp>
 #include <configuration.hpp>
 #include <unistd.h>
@@ -18,7 +19,7 @@ namespace Plugins {
         fs::path path = Configuration::relativePluginsDirectory / name;
 
         if (!fs::exists(path)) {
-            path = Configuration::globalPluginsDirectory / name;
+            path = Installer::GLOBAL_PLUGINS_DIRECTORY / name;
         }
 
         if (fs::exists(path)) {
@@ -156,7 +157,8 @@ namespace Plugins {
 
         if (result != ExecuteResult::Ok) {
             if (result == ExecuteResult::NotFound) {
-                return luaL_error(L, "Plugin '%s' not found", name.c_str());
+                lua_pushnil(L);
+                return 1;
             }
 
             return 0;

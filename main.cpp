@@ -43,7 +43,11 @@ void run(lua_State* L, int argc, char* argv[]) {
     if (argc > 1) {
         const char* argument = argv[1];
 
-        if (API::PushSmakeFunction(L, argument)) { // Check for function first to allow overriding
+        if (Configuration::aliases.contains(argument)) { // Aliases override functions
+            argument = Configuration::aliases[argument].c_str();
+        }
+
+        if (API::PushSmakeFunction(L, argument)) { // Check for function first to allow overriding help command
             for (int i = 2; i < argc; i++) {
                 lua_pushstring(L, argv[i]);
             }
@@ -59,13 +63,31 @@ void run(lua_State* L, int argc, char* argv[]) {
                 help += "\n- " + name;
             }
 
+            if (Configuration::aliases.size() > 0) {
+                help += "\n\n\033[4mAliases\033[0m";
+
+                for (const auto& [alias, name] : Configuration::aliases) {
+                    help += "\n- " + alias + ": " + name;
+                }
+            }
+
             std::cout << help << std::endl;
         }
+        else {
+            std::cout << "Function 'smake." << argument << "' does not exist.";
 
-        return;
+            if (lua_getglobal(L, argument) != LUA_TNIL) {
+                std::cout << " It exists in the global environment. Did you forget to add 'smake.' in front of it?";
+            }
+
+            std::cout << std::endl;
+
+            lua_pop(L, 1);
+        }
     }
-
-    API::CallSmakeFunction(L, "build");
+    else {
+        API::CallSmakeFunction(L, Configuration::defaultCommand.c_str());
+    }
 }
 
 int main(int argc, char *argv[]) {

@@ -18,7 +18,7 @@ namespace Installer
     #endif
 
     void Init() {
-        #if __CYGWIN__
+        #if defined(__CYGWIN__) || defined(_WIN32)
             LPWSTR programDataPath;
 
             if (!SUCCEEDED(SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, NULL, &programDataPath)))

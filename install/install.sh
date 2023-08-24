@@ -60,7 +60,8 @@ if [ $InstallPlugins ]; then
     unzip -q plugins.zip
     rm plugins.zip
     rm -rf $HOME/.smake/plugins/smake
-    mv ./smake-plugins-main $HOME/.smake/plugins/smake
+    mv ./smake-plugins-main/smake $HOME/.smake/plugins/smake
+    rm -rf ./smake-plugins-main
 fi
 
 if [ $InstallLibrary ]; then

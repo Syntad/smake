@@ -80,7 +80,8 @@ if ($InstallPlugins) {
         Remove-Item $OfficialPluginsDir -Recurse
     }
 
-    Move-Item -Path "./smake-plugins-main" -Destination $OfficialPluginsDir
+    Move-Item -Path "./smake-plugins-main/smake" -Destination $OfficialPluginsDir
+    Remove-Item -Path "./smake-plugins-main" -Recurse
 
     Write-Output "Installed Smake plugins"
 }

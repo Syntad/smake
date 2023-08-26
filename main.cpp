@@ -1,4 +1,4 @@
-#include <installer.hpp>
+#include <paths.hpp>
 #include <plugins.hpp>
 #include <api.hpp>
 #include <configuration.hpp>
@@ -92,7 +92,7 @@ void run(lua_State* L, int argc, char* argv[]) {
 }
 
 int main(int argc, char *argv[]) {
-    Installer::Init();
+    Paths::Init();
 
     lua_State* L = luaL_newstate();
     luaL_openlibs(L);

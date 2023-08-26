@@ -9,7 +9,7 @@ import('smake/dependencyIncluder', true)
 spinner.SetOptions({ symbols = 'clock' })
 
 function smake.build()
-    spinner.Call(InstallDependencies, 'Installing Dependencies', '✅ Installed Dependencies', 'openssl', 'curl', 'lua', 'rapidjson')
+    spinner.Call(InstallDependencies, 'Installing Dependencies', '✅ Installed Dependencies', 'lua', 'rapidjson')
 
     standard('c++2a')
     include('include')

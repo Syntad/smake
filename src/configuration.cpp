@@ -1,5 +1,5 @@
 #include <configuration.hpp>
-#include <installer.hpp>
+#include <paths.hpp>
 #include <fstream>
 #include <filesystem>
 #include <rapidjson/document.h>
@@ -74,12 +74,12 @@ namespace Configuration {
     }
 
     void loadGlobal(lua_State* L) {
-        if (!fs::exists(Installer::CONFIGURATION_PATH)) {
+        if (!fs::exists(Paths::CONFIGURATION_PATH)) {
             return;
         }
 
         rapidjson::Document doc;
-        parseJsonFile(doc, Installer::CONFIGURATION_PATH);
+        parseJsonFile(doc, Paths::CONFIGURATION_PATH);
 
         loadShared(doc);
         setConfig(L, doc);

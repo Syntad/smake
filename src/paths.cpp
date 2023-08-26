@@ -1,6 +1,4 @@
-#include <installer.hpp>
-#include <fstream>
-#include <iostream>
+#include <paths.hpp>
 
 #if defined(__CYGWIN__) || defined(_WIN32)
     #include <Windows.h>
@@ -11,8 +9,7 @@
     #include <pwd.h>
 #endif
 
-namespace Installer
-{
+namespace Paths {
     fs::path APP_DATA;
     fs::path CONFIGURATION_PATH;
     fs::path GLOBAL_PLUGINS_DIRECTORY;
@@ -41,29 +38,5 @@ namespace Installer
 
         CONFIGURATION_PATH = APP_DATA / "config.json";
         GLOBAL_PLUGINS_DIRECTORY = APP_DATA / "plugins";
-
-        if (!fs::exists(APP_DATA)) {
-            fs::create_directory(APP_DATA);
-            fs::create_directory(GLOBAL_PLUGINS_DIRECTORY);
-            
-            std::ofstream configFile(CONFIGURATION_PATH);
-            configFile << "{}";
-            configFile.close();
-        }
-    }
-
-    // TODO
-    void InstallPlugins() {
-
-    }
-
-    // TODO
-    bool CheckForUpdates() {
-        return false;
-    }
-
-    // TODO
-    void Update() {
-        
     }
 }

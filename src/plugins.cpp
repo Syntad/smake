@@ -1,5 +1,5 @@
 #include <plugins.hpp>
-#include <installer.hpp>
+#include <paths.hpp>
 #include <api.hpp>
 #include <configuration.hpp>
 #include <unistd.h>
@@ -19,7 +19,7 @@ namespace Plugins {
         fs::path path = Configuration::relativePluginsDirectory / name;
 
         if (!fs::exists(path)) {
-            path = Installer::GLOBAL_PLUGINS_DIRECTORY / name;
+            path = Paths::GLOBAL_PLUGINS_DIRECTORY / name;
         }
 
         if (fs::exists(path)) {

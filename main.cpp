@@ -3,6 +3,7 @@
 #include <api.hpp>
 #include <configuration.hpp>
 #include <iostream>
+#include <fstream>
 #include <cstring>
 #include <vector>
 #include <string>
@@ -29,7 +30,7 @@ void run(lua_State* L, int argc, char* argv[]) {
         Plugins::ExecuteResult result = Plugins::Execute(argv[2]);
 
         if (result == Plugins::ExecuteResult::NotFound) {
-            std::cerr << "Plugin not found" << std::endl;
+            std::cerr << "Plugin not found\n";
         }
 
         return;
@@ -56,8 +57,7 @@ void run(lua_State* L, int argc, char* argv[]) {
             lua_call(L, argc - 2, 0);
         }
         else if (!strcmp(argument, "help") || !strcmp(argument, "--help")) {
-            std::string help =
-            "\033[4mFunctions\033[0m";
+            std::string help = "\033[4mFunctions\033[0m";
             std::vector<std::string> names = getFunctionNames(L);
 
             for (const auto& name : names) {
@@ -72,7 +72,28 @@ void run(lua_State* L, int argc, char* argv[]) {
                 }
             }
 
-            std::cout << help << std::endl;
+            std::cout << help << '\n';
+        }
+        else if (!strcmp(argument, "init") || !strcmp(argument, "--i")) {
+            if (fs::exists(Configuration::smakeFileName)) {
+                std::cout << "The file '" << Configuration::smakeFileName << "' already exists. Do you want to override it? (y/n): ";
+                int response = tolower(getchar());
+
+                if (response != 'y') {
+                    std::cout << "❌ File not overridden. Exiting.\n";
+                    return;
+                }
+            }
+
+            std::ofstream file(Configuration::smakeFileName);
+
+            file << "function smake.build()\n"
+                    "  print('Hello Smake!')\n"
+                    "end";
+
+            file.close();
+
+            std::cout << "✅ Successfully saved " << Configuration::smakeFileName << '\n';
         }
         else {
             std::cout << "Function 'smake." << argument << "' does not exist.";
@@ -81,7 +102,7 @@ void run(lua_State* L, int argc, char* argv[]) {
                 std::cout << " It exists in the global environment. Did you forget to add 'smake.' in front of it?";
             }
 
-            std::cout << std::endl;
+            std::cout << '\n';
 
             lua_pop(L, 1);
         }

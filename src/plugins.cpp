@@ -116,7 +116,7 @@ namespace Plugins {
         int nargs = lua_gettop(L);
 
         if (nargs > 2) {
-            std::cerr << "Invalid number of arguments provided to import" << std::endl;
+            std::cerr << "Invalid number of arguments provided to import\n";
             return 0;
         }
 

@@ -38,6 +38,6 @@ function smake.build()
     end
 
     local ninjaCompiler = ninja(gppCompiler);
-    spinner.Call(ninjaCompiler.compile, 'Creating build file', '✅ Created Ninja file', ninjaCompiler, 'build')
+    spinner.Call(ninjaCompiler.generateBuildFile, 'Creating build file', '✅ Created Ninja file', ninjaCompiler, 'build')
     spinner.Call(run, 'Building', '✅ Built', 'ninja')
 end

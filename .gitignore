@@ -3,6 +3,8 @@ smake.exe
 smake.o
 dependencies
 smake/library
+build
+build.ninja
 
 .*
 !/.gitignore

@@ -19,8 +19,7 @@ function smake.install()
 end
 
 function smake.build()
-    local gppCompiler = gppCompiler()
-    gppCompiler:makeGlobal()
+    local ninjaGen = ninja.fromGlobalCompiler()
     spinner.Call(InstallDependencies, 'Installing Dependencies', '✅ Installed Dependencies', 'lua', 'rapidjson')
 
     standard('c++2a')
@@ -37,7 +36,6 @@ function smake.build()
         link { 'dl' }
     end
 
-    local ninjaCompiler = ninja(gppCompiler);
-    spinner.Call(ninjaCompiler.generateBuildFile, 'Creating build file', '✅ Created Ninja file', ninjaCompiler, 'build')
+    spinner.Call(ninjaGen.generateBuildFile, 'Creating build file', '✅ Created Ninja file', ninjaGen, 'build')
     spinner.Call(run, 'Building', '✅ Built', 'ninja')
 end

@@ -2,6 +2,7 @@
 #include <platform.hpp>
 #include <plugins.hpp>
 #include <spinner.hpp>
+#include <luaJson.hpp>
 #include <string>
 #include <stack>
 #include <filesystem>
@@ -77,6 +78,7 @@ namespace API {
         Platform::Register(L);
         Plugins::Register(L);
         Spinner::Register(L);
+        LuaJSON::Register(L);
     }
 
     bool PushSmakeFunction(lua_State* L, const char* func) {

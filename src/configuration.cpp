@@ -31,6 +31,8 @@ namespace Configuration {
         lua_pushstring(L, "config");
         LuaJSON::PushJSONValue(L, doc);
         lua_rawset(L, -3);
+
+        lua_pop(L, 1);
     }
 
     void mergeConfig(lua_State* L, const rapidjson::Document& doc) {
@@ -49,6 +51,8 @@ namespace Configuration {
             lua_rotate(L, -2, 1); // move value to top
             lua_rawset(L, -5);
         }
+
+        lua_pop(L, 3);
     }
 
     void loadShared(const rapidjson::Document& doc) {
@@ -83,8 +87,6 @@ namespace Configuration {
 
         loadShared(doc);
         setConfig(L, doc);
-
-        lua_pop(L, 1);
     }
 
     void loadLocal(lua_State* L) {
@@ -101,9 +103,6 @@ namespace Configuration {
 
         loadShared(doc);
         mergeConfig(L, doc);
-        
-        // Clean stack
-        lua_pop(L, 3);
     }
 
     void Load(lua_State* L) {

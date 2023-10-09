@@ -1,5 +1,6 @@
 #include <luaJson.hpp>
 #include <stdexcept>
+#include <iostream>
 
 namespace LuaJSON {
     void pushJSONObject(lua_State* L, const rapidjson::Value& value) {
@@ -53,5 +54,24 @@ namespace LuaJSON {
             case rapidjson::Type::kNumberType: pushJSONNumber(L, value); break;
             default: throw std::invalid_argument("Unsupported value type"); break;
         }
+    }
+
+    int l_decodeJson(lua_State* L) {
+        const char* json = luaL_checkstring(L, 1);
+        rapidjson::Document doc;
+        doc.Parse(json);
+        PushJSONValue(L, doc);
+
+        return 1;
+    }
+
+    void Register(lua_State* L) {
+        lua_getglobal(L, "smake");
+
+        lua_pushstring(L, "jsonDecode");
+        lua_pushcfunction(L, l_decodeJson);
+        lua_rawset(L, -3);
+
+        lua_pop(L, 1);
     }
 }

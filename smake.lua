@@ -37,6 +37,7 @@ function smake.build()
         link { 'dl' }
     end
 
-    -- spinner.Call(compile, 'Building', '✅ Built')
-    ninja(gppCompiler):compile('build')
+    local ninjaCompiler = ninja(gppCompiler);
+    spinner.Call(ninjaCompiler.compile, 'Creating build file', '✅ Created Ninja file', ninjaCompiler, 'build')
+    spinner.Call(run, 'Building', '✅ Built', 'ninja')
 end
